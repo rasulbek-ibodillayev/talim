@@ -1,0 +1,72 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import bar %}
+{% block title %}Natija{% endblock %}
+{% block content %}
+<div id="msg" class="msg" role="alert" hidden></div>
+<section class="box result-top {{ 'pass' if passed else 'fail' }}">
+  <p class="muted">{{ 'Diagnostik test' if a.kind == 'diagnostic' else ('Mavzu testi: ' ~ (topic.title if topic else "o'chirilgan mavzu")) }} · {{ a.finished_at | dt }}</p>
+  <p class="score">{{ percent }}%</p>
+  <p>{{ a.score }} / {{ a.total }} ta to'g'ri javob</p>
+  {% if a.kind == 'topic' %}
+    {% if passed %}<h2>🎉 Tabriklaymiz, mavzu o'zlashtirildi!</h2>
+    {% else %}<h2>Bu safar yetarli emas</h2><p class="muted">O'tish uchun kamida {{ pass_percent }}% kerak. Materiallarni qayta ko'rib chiqing va yana urinib ko'ring.</p>{% endif %}
+  {% endif %}
+</section>
+
+{% if a.kind == 'diagnostic' %}
+<section class="box">
+  <h2>Mavzular bo'yicha natija</h2>
+  {% for t in topics_res %}
+    <div class="row-bar">
+      <div class="row-title"><a href="/topic/{{ t.id }}">{{ t.title }}</a><span>{{ t.correct }}/{{ t.total }} · {{ t.percent }}%</span></div>
+      {{ bar(t.percent) }}
+    </div>
+  {% endfor %}
+</section>
+<section class="box">
+  {% if weak %}
+    <h2>📌 Sizga o'rganish tavsiya etiladi</h2>
+    <p class="muted">Quyidagi mavzularda bilimingizni mustahkamlash kerak. Avval shulardan boshlang:</p>
+    <ol class="list">
+      {% for t in weak %}<li><a href="/topic/{{ t.id }}"><b>{{ t.title }}</b></a> <span class="muted">({{ t.percent }}%)</span></li>{% endfor %}
+    </ol>
+    <a class="btn inline" href="/topic/{{ weak[0].id }}">{{ weak[0].title }} mavzusidan boshlash</a>
+  {% else %}
+    <h2>🎉 Ajoyib natija!</h2>
+    <p class="muted">Barcha mavzularni yaxshi bilasiz. Xohlasangiz, mavzu testlarini topshirib bilimingizni tasdiqlang.</p>
+    <a class="btn inline" href="/path">Mavzularga o'tish</a>
+  {% endif %}
+  {% if strong %}
+    <p class="small-t">Yaxshi bilgan mavzularingiz: {% for t in strong %}{{ t.title }}{{ ', ' if not loop.last }}{% endfor %}.</p>
+  {% endif %}
+</section>
+{% else %}
+<section class="box">
+  <div class="actions">
+    {% if topic %}<a class="ghost" href="/topic/{{ topic.id }}">{{ "Materiallarni qayta ko'rish" if not passed else 'Mavzuga qaytish' }}</a>
+      {% if not passed %}<button class="btn inline" type="button" data-start-url="/api/topic/{{ topic.id }}/test/start">Qayta urinish</button>{% endif %}{% endif %}
+    {% if passed and next_topic %}<a class="btn inline" href="/topic/{{ next_topic.id }}">Keyingi mavzu: {{ next_topic.title }}</a>{% endif %}
+    {% if passed and not next_topic %}<a class="btn inline" href="/dashboard">Bosh sahifaga</a>{% endif %}
+  </div>
+</section>
+{% endif %}
+
+<section class="box">
+  <h2>Javoblar tahlili</h2>
+  {% for q in review %}
+  <div class="review {{ 'right' if q.right else 'wrong' }}">
+    <p class="q"><b>{{ loop.index }}.</b> {{ q.text }} <small class="muted">({{ q.topic }})</small></p>
+    <ul class="opts">
+      {% for o in q.options %}
+        <li class="{{ 'correct' if loop.index0 == q.correct }} {{ 'chosen' if loop.index0 == q.chosen }}">
+          {{ ['A','B','C','D'][loop.index0] }}) {{ o }}
+          {% if loop.index0 == q.correct %}<em>✓ to'g'ri javob</em>{% elif loop.index0 == q.chosen %}<em>✗ sizning javobingiz</em>{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    {% if q.chosen is none %}<p class="small-t muted">Javob berilmagan.</p>{% endif %}
+    {% if q.explanation %}<p class="small-t">💡 {{ q.explanation }}</p>{% endif %}
+  </div>
+  {% endfor %}
+</section>
+{% endblock %}

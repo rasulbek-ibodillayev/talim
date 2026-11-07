@@ -1,0 +1,31 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import bar, badge %}
+{% block title %}Mavzular{% endblock %}
+{% block content %}
+<h1>O'quv yo'li</h1>
+{% if not has_diag %}
+  <div class="flash info">Sizga mos tartibni olish uchun avval <a href="/diagnostic"><b>diagnostik testni</b></a> topshiring.
+  Hozircha mavzular dastur tartibida ko'rsatilgan.</div>
+{% else %}
+  <p class="muted">Mavzular diagnostika natijangiz bo'yicha tartiblangan: avval o'rganish kerak bo'lganlari.</p>
+{% endif %}
+
+{% for t in topics %}
+<article class="box topic-card {{ t.status }}">
+  <div class="topic-head">
+    <h2><a href="/topic/{{ t.id }}">{{ t.title }}</a></h2>
+    {{ badge(t.status, t.label) }}
+  </div>
+  <p class="muted">{{ t.summary }}</p>
+  <div class="meta">
+    <span>📚 Materiallar: {{ t.mat_read }}/{{ t.mat_total }}</span>
+    {% if t.diag_percent is not none %}<span>🎯 Diagnostika: {{ t.diag_percent }}%</span>{% endif %}
+    {% if t.best_percent is not none %}<span>✅ Eng yaxshi test: {{ t.best_percent }}%</span>{% endif %}
+  </div>
+  {{ bar((100 * t.mat_read / t.mat_total) | round | int if t.mat_total else 0) }}
+  <a class="btn inline sm" href="/topic/{{ t.id }}">{{ 'Qayta ko\'rish' if t.passed else 'O\'rganish' }}</a>
+</article>
+{% else %}
+  <div class="box"><p class="muted">Mavzular hali kiritilmagan.</p></div>
+{% endfor %}
+{% endblock %}

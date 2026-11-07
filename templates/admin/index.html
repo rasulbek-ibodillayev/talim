@@ -1,0 +1,39 @@
+{% extends "app_base.html" %}
+{% block title %}Admin{% endblock %}
+{% block content %}
+<h1>Admin panel</h1>
+<p class="muted">Foydalanuvchilar: <b>{{ stats.users }}</b> · Topshirilgan testlar: <b>{{ stats.attempts }}</b> ·
+  <a href="/admin/users">Foydalanuvchilar ro'yxati</a></p>
+
+<section class="box">
+  <h2>Mavzular</h2>
+  <div class="table-wrap"><table>
+    <tr><th>№</th><th>Mavzu</th><th>Holat</th><th>Material</th><th>Diagnostik</th><th>Mavzu testi</th><th></th></tr>
+    {% for t in topics %}
+    <tr>
+      <td>{{ t.position }}</td>
+      <td>{{ t.title }}</td>
+      <td>{{ 'Faol' if t.published else 'Yashirin' }}</td>
+      <td>{{ t.n_mat }}</td>
+      <td>{{ t.n_diag }}</td>
+      <td>{{ t.n_test }}</td>
+      <td><a href="/admin/topic/{{ t.id }}">Boshqarish</a></td>
+    </tr>
+    {% else %}<tr><td colspan="7" class="muted">Mavzu yo'q</td></tr>{% endfor %}
+  </table></div>
+</section>
+
+<section class="box">
+  <h3>Yangi mavzu qo'shish</h3>
+  <form method="post" action="/admin/topic/new">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label>Nomi <input name="title" maxlength="120" required></label>
+    <label>Qisqacha tavsif <input name="summary" maxlength="300"></label>
+    <div class="two">
+      <label>Tartib raqami <input name="position" type="number" value="{{ (topics|length) + 1 }}"></label>
+      <label class="check"><input type="checkbox" name="published" checked> Foydalanuvchilarga ko'rinsin</label>
+    </div>
+    <button class="btn inline" type="submit">Qo'shish</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "app_base.html" %}
+{% block title %}Materialni tahrirlash{% endblock %}
+{% block content %}
+<a class="back" href="/admin/topic/{{ m.topic_id }}">← Mavzuga qaytish</a>
+<h1>Materialni tahrirlash</h1>
+<section class="box">
+  <form method="post">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label>Sarlavha <input name="title" maxlength="150" value="{{ m.title }}" required></label>
+    <label>Matn (abzaslar bo'sh qator bilan ajratiladi)
+      <textarea name="body" rows="14" maxlength="20000">{{ m.body }}</textarea></label>
+    <div class="two">
+      <label>Qo'shimcha havola <input name="url" value="{{ m.url }}" placeholder="https://..."></label>
+      <label>Tartib raqami <input name="position" type="number" value="{{ m.position }}"></label>
+    </div>
+    <button class="btn inline" type="submit">Saqlash</button>
+  </form>
+  <form method="post" action="/admin/material/{{ m.id }}/delete" data-confirm="Material o'chirilsinmi?">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <button class="ghost danger" type="submit">Materialni o'chirish</button>
+  </form>
+</section>
+{% endblock %}

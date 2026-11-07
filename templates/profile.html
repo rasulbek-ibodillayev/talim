@@ -1,0 +1,62 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import avatar %}
+{% block title %}Profil{% endblock %}
+{% block content %}
+<h1>Mening profilim</h1>
+<div id="msg" class="msg" role="alert" hidden></div>
+
+<section class="box">
+  <div class="avatar-row">
+    <div id="avatar-holder">{{ avatar(user, 'xl') }}</div>
+    <div>
+      <p class="muted">JPG, PNG yoki WEBP, 2 MB gacha.</p>
+      <input type="file" id="avatar-input" accept="image/jpeg,image/png,image/webp" hidden>
+      <button class="ghost" type="button" id="avatar-pick">Rasm yuklash</button>
+      {% if user.avatar %}<button class="ghost danger" type="button" id="avatar-delete">Rasmni o'chirish</button>{% endif %}
+    </div>
+  </div>
+</section>
+
+<section class="box">
+  <h3>Shaxsiy ma'lumotlar</h3>
+  <form id="profile-form" novalidate>
+    <div class="two">
+      <label>Ism <input name="first_name" maxlength="50" value="{{ user.first_name }}" required></label>
+      <label>Familiya <input name="last_name" maxlength="50" value="{{ user.last_name }}" required></label>
+    </div>
+    <label>Telefon raqam (login)
+      <input value="{{ user.phone }}" disabled>
+    </label>
+    <div class="two">
+      <label>Hudud
+        <select name="region" required>
+          {% for r in regions %}<option value="{{ r }}" {{ 'selected' if r == user.region }}>{{ r }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Tug'ilgan yil
+        <input name="birth_year" inputmode="numeric" maxlength="4" placeholder="Masalan: 2005" value="{{ user.birth_year or '' }}">
+      </label>
+    </div>
+    <label>O'qish / ish joyi
+      <input name="education" maxlength="100" placeholder="Masalan: 12-maktab, 10-sinf" value="{{ user.education or '' }}">
+    </label>
+    <label>O'zim haqimda
+      <textarea name="bio" maxlength="300" rows="3" placeholder="Qisqacha o'zingiz haqingizda (300 belgigacha)">{{ user.bio or '' }}</textarea>
+    </label>
+    <p class="muted small-t">Ro'yxatdan o'tgan sana: {{ user.created_at | dt }}</p>
+    <button class="btn inline" type="submit">Saqlash</button>
+  </form>
+</section>
+
+<section class="box">
+  <h3>Parolni o'zgartirish</h3>
+  <form id="password-form" novalidate>
+    <label>Joriy parol <input name="old" type="password" autocomplete="current-password" required></label>
+    <div class="two">
+      <label>Yangi parol (kamida 8 belgi) <input name="new" type="password" autocomplete="new-password" minlength="8" required></label>
+      <label>Yangi parolni takrorlang <input name="new2" type="password" autocomplete="new-password" minlength="8" required></label>
+    </div>
+    <button class="btn inline" type="submit">Parolni yangilash</button>
+  </form>
+</section>
+{% endblock %}

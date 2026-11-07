@@ -1,0 +1,80 @@
+{% extends "app_base.html" %}
+{% block title %}{{ topic.title }} (admin){% endblock %}
+{% block content %}
+<a class="back" href="/admin">← Admin</a>
+<h1>{{ topic.title }}</h1>
+
+<section class="box">
+  <h2>Mavzu ma'lumotlari</h2>
+  <form method="post" action="/admin/topic/{{ topic.id }}/save">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label>Nomi <input name="title" maxlength="120" value="{{ topic.title }}" required></label>
+    <label>Qisqacha tavsif <input name="summary" maxlength="300" value="{{ topic.summary }}"></label>
+    <div class="two">
+      <label>Tartib raqami <input name="position" type="number" value="{{ topic.position }}"></label>
+      <label class="check"><input type="checkbox" name="published" {{ 'checked' if topic.published }}> Foydalanuvchilarga ko'rinsin</label>
+    </div>
+    <button class="btn inline" type="submit">Saqlash</button>
+  </form>
+  <form method="post" action="/admin/topic/{{ topic.id }}/delete" data-confirm="Mavzu, uning materiallari va savollari butunlay o'chiriladi. Davom etasizmi?">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <button class="ghost danger" type="submit">Mavzuni o'chirish</button>
+  </form>
+</section>
+
+<section class="box">
+  <h2>Materiallar ({{ materials|length }})</h2>
+  <ul class="list">
+    {% for m in materials %}
+      <li>{{ m.position }}. <b>{{ m.title }}</b> <a href="/admin/material/{{ m.id }}">Tahrirlash</a></li>
+    {% else %}<li class="muted">Material yo'q</li>{% endfor %}
+  </ul>
+  <h3>Material qo'shish</h3>
+  <form method="post" action="/admin/topic/{{ topic.id }}/material">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label>Sarlavha <input name="title" maxlength="150" required></label>
+    <label>Matn (abzaslar bo'sh qator bilan ajratiladi)
+      <textarea name="body" rows="8" maxlength="20000"></textarea></label>
+    <div class="two">
+      <label>Qo'shimcha havola (ixtiyoriy: video, maqola) <input name="url" placeholder="https://..."></label>
+      <label>Tartib raqami <input name="position" type="number" value="{{ (materials|length) + 1 }}"></label>
+    </div>
+    <button class="btn inline" type="submit">Qo'shish</button>
+  </form>
+</section>
+
+<section class="box" id="questions">
+  <h2>Savollar ({{ questions|length }})</h2>
+  <p class="muted small-t"><b>Diagnostik</b> savollar boshlang'ich testda, <b>Mavzu</b> savollari esa mavzu testida ishlatiladi.</p>
+  <div class="table-wrap"><table>
+    <tr><th>Tur</th><th>Savol</th><th>To'g'ri</th><th></th></tr>
+    {% for q in questions %}
+    <tr>
+      <td>{{ 'Diagnostik' if q.kind == 'diagnostic' else 'Mavzu' }}</td>
+      <td>{{ q.text }}</td>
+      <td>{{ ['A','B','C','D'][q.correct - 1] }}</td>
+      <td><a href="/admin/question/{{ q.id }}">Tahrirlash</a></td>
+    </tr>
+    {% else %}<tr><td colspan="4" class="muted">Savol yo'q</td></tr>{% endfor %}
+  </table></div>
+
+  <h3>Savol qo'shish</h3>
+  <form method="post" action="/admin/topic/{{ topic.id }}/question">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    {% include "admin/_question_fields.html" %}
+    <button class="btn inline" type="submit">Qo'shish</button>
+  </form>
+
+  <h3>Ko'plab savollarni birdan qo'shish</h3>
+  <form method="post" action="/admin/topic/{{ topic.id }}/import">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label>Turi
+      <select name="kind"><option value="topic">Mavzu testi</option><option value="diagnostic">Diagnostik test</option></select>
+    </label>
+    <label>Savollar (har bir savol bo'sh qator bilan ajratiladi)
+      <textarea name="text" rows="12" placeholder="Amir Temur qachon tug'ilgan?&#10;A) 1336-yilda&#10;B) 1370-yilda&#10;C) 1405-yilda&#10;D) 1220-yilda&#10;Javob: A&#10;Izoh: Temur 1336-yilda Keshda tug'ilgan.&#10;&#10;Keyingi savol..."></textarea>
+    </label>
+    <button class="btn inline" type="submit">Import qilish</button>
+  </form>
+</section>
+{% endblock %}

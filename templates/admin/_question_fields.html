@@ -1,0 +1,24 @@
+{% set qq = q if q is defined else none %}
+<div class="two">
+  <label>Turi
+    <select name="kind">
+      <option value="topic" {{ 'selected' if qq and qq.kind == 'topic' }}>Mavzu testi</option>
+      <option value="diagnostic" {{ 'selected' if qq and qq.kind == 'diagnostic' }}>Diagnostik test</option>
+    </select>
+  </label>
+  <label>To'g'ri javob
+    <select name="correct" required>
+      {% for n in range(1, 5) %}
+        <option value="{{ n }}" {{ 'selected' if qq and qq.correct == n }}>{{ ['A','B','C','D'][n-1] }}</option>
+      {% endfor %}
+    </select>
+  </label>
+</div>
+<label>Savol matni <textarea name="text" rows="2" maxlength="500" required>{{ qq.text if qq else '' }}</textarea></label>
+<div class="two">
+  <label>A varianti <input name="o1" maxlength="300" value="{{ qq.o1 if qq else '' }}" required></label>
+  <label>B varianti <input name="o2" maxlength="300" value="{{ qq.o2 if qq else '' }}" required></label>
+  <label>C varianti <input name="o3" maxlength="300" value="{{ qq.o3 if qq else '' }}" required></label>
+  <label>D varianti <input name="o4" maxlength="300" value="{{ qq.o4 if qq else '' }}" required></label>
+</div>
+<label>Izoh (test yakunida ko'rsatiladi, ixtiyoriy) <input name="explanation" maxlength="500" value="{{ qq.explanation if qq else '' }}"></label>

@@ -1,0 +1,74 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import avatar, bar, badge %}
+{% block title %}Bosh sahifa{% endblock %}
+{% block content %}
+<section class="box hero">
+  {{ avatar(user, 'lg') }}
+  <div>
+    <h1>Salom, {{ user.first_name }}!</h1>
+    <p class="muted">{{ user.first_name }} {{ user.last_name }} · {{ user.phone }} · {{ user.region }}</p>
+  </div>
+  <a class="ghost" href="/profile">Profilni tahrirlash</a>
+</section>
+
+<section class="box next">
+  {% if not total %}
+    <h2>Mavzular hali kiritilmagan</h2>
+    <p class="muted">O'qituvchi/administrator tez orada mavzular qo'shadi.</p>
+  {% elif not diag %}
+    <span class="step">1-qadam</span>
+    <h2>Tarix fanidan bilim darajangizni aniqlang</h2>
+    <p class="muted">Qisqa diagnostik test sizning kuchli va zaif mavzularingizni aniqlaydi. So'ng sizga mos o'quv yo'li tuziladi.</p>
+    <a class="btn inline" href="/diagnostic">Diagnostik testni boshlash</a>
+  {% elif next_topic %}
+    <span class="step">Keyingi qadam</span>
+    <h2>{{ next_topic.title }}</h2>
+    <p class="muted">
+      {% if next_topic.status == 'weak' %}Diagnostikada bu mavzu bo'yicha {{ next_topic.diag_percent }}% natija ko'rsatdingiz, shu mavzudan boshlash tavsiya etiladi.
+      {% else %}{{ next_topic.summary }}{% endif %}
+    </p>
+    <a class="btn inline" href="/topic/{{ next_topic.id }}">Mavzuni o'rganish</a>
+  {% else %}
+    <h2>🎉 Barcha mavzular o'zlashtirildi!</h2>
+    <p class="muted">Bilimingizni qayta tekshirish uchun diagnostik testni yana topshirishingiz mumkin.</p>
+    <a class="btn inline" href="/diagnostic">Qayta tekshirish</a>
+  {% endif %}
+</section>
+
+<div class="grid2">
+  <section class="box">
+    <h3>Umumiy jarayon</h3>
+    <p class="big">{{ done }} / {{ total }} <small>mavzu o'zlashtirildi</small></p>
+    {{ bar((100 * done / total) | round | int if total else 0) }}
+    {% if diag %}
+      <p class="muted small-t">Oxirgi diagnostika: <b>{{ diag.score | pct(diag.total) }}%</b> ({{ diag.score }}/{{ diag.total }}) · {{ diag.finished_at | dt }}</p>
+    {% endif %}
+  </section>
+  <section class="box">
+    <h3>Mavzular</h3>
+    <ul class="list">
+      {% for t in topics[:5] %}
+        <li><a href="/topic/{{ t.id }}">{{ t.title }}</a> {{ badge(t.status, t.label) }}</li>
+      {% else %}<li class="muted">Mavzular yo'q</li>{% endfor %}
+    </ul>
+    {% if topics|length > 5 %}<a class="more" href="/path">Barchasini ko'rish →</a>{% endif %}
+  </section>
+</div>
+
+<section class="box">
+  <h3>So'nggi natijalar</h3>
+  {% if recent %}
+  <div class="table-wrap"><table>
+    <tr><th>Test</th><th>Natija</th><th>Sana</th><th></th></tr>
+    {% for a in recent %}
+      <tr>
+        <td>{% if a.kind == 'diagnostic' %}Diagnostik test{% else %}{{ a.topic_title or "O'chirilgan mavzu" }}{% endif %}</td>
+        <td><b>{{ a.score | pct(a.total) }}%</b> ({{ a.score }}/{{ a.total }})</td>
+        <td>{{ a.finished_at | dt }}</td>
+        <td><a href="/result/{{ a.id }}">Ko'rish</a></td>
+      </tr>
+    {% endfor %}
+  </table></div>
+  {% else %}<p class="muted">Hali test topshirilmagan.</p>{% endif %}
+</section>
+{% endblock %}

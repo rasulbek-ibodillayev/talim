@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kirish va ro'yxatdan o'tish</title>
+  <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+<main class="card" id="app" data-bot="{{ bot_username }}">
+  <h1>Xush kelibsiz</h1>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="login" role="tab">Kirish</button>
+    <button class="tab" data-tab="register" role="tab">Ro'yxatdan o'tish</button>
+  </div>
+
+  <div id="msg" class="msg" role="alert" hidden></div>
+
+  <!-- KIRISH -->
+  <section id="tab-login" class="panel">
+    <form id="login-form" autocomplete="on" novalidate>
+      <label>Telefon raqam
+        <div class="phone">
+          <span>+998</span>
+          <input name="phone" type="tel" inputmode="numeric" placeholder="90 123 45 67" autocomplete="username" required>
+        </div>
+      </label>
+      <label>Parol
+        <input name="password" type="password" autocomplete="current-password" required>
+      </label>
+      <button class="btn" type="submit">Kirish</button>
+    </form>
+  </section>
+
+  <!-- RO'YXATDAN O'TISH -->
+  <section id="tab-register" class="panel" hidden>
+    <ol class="steps" id="steps">
+      <li class="on">Telefon</li><li>Bot</li><li>Ma'lumot</li>
+    </ol>
+
+    <!-- 1-qadam -->
+    <form id="step1" novalidate>
+      <label>Telefon raqam
+        <div class="phone">
+          <span>+998</span>
+          <input name="phone" type="tel" inputmode="numeric" placeholder="90 123 45 67" required>
+        </div>
+      </label>
+      <button class="btn" type="submit">Davom etish</button>
+    </form>
+
+    <!-- 2-qadam -->
+    <div id="step2" hidden>
+      <p class="hint">1. Quyidagi kodni nusxalang va Telegram botga yuboring:</p>
+      <div class="code-box">
+        <span id="codeA">----</span>
+        <button type="button" class="ghost" id="copyBtn">Nusxalash</button>
+      </div>
+      <a class="btn tg" id="botLink" target="_blank" rel="noopener">Botni ochish: @<span id="botName"></span></a>
+      <p class="hint small">Tugma orqali ochsangiz, kod botga avtomatik yuboriladi.</p>
+      <p class="timer">Kod amal qilish muddati: <b id="timer">10:00</b></p>
+
+      <form id="step2form" novalidate>
+        <p class="hint">2. Bot bergan yangi kodni shu yerga kiriting:</p>
+        <input class="code-input" name="code" maxlength="9" autocomplete="off" autocapitalize="characters" placeholder="XXXX-XXXX" required>
+        <button class="btn" type="submit">Tasdiqlash</button>
+      </form>
+      <button type="button" class="link" id="restart">Boshidan boshlash</button>
+    </div>
+
+    <!-- 3-qadam -->
+    <form id="step3" hidden novalidate>
+      <label>Ism
+        <input name="first_name" maxlength="50" autocomplete="given-name" required>
+      </label>
+      <label>Familiya
+        <input name="last_name" maxlength="50" autocomplete="family-name" required>
+      </label>
+      <label>Hudud
+        <select name="region" required>
+          <option value="">Tanlang...</option>
+          {% for r in regions %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Parol (kamida 8 belgi)
+        <input name="password" type="password" minlength="8" autocomplete="new-password" required>
+      </label>
+      <label>Parolni takrorlang
+        <input name="password2" type="password" minlength="8" autocomplete="new-password" required>
+      </label>
+      <button class="btn" type="submit">Ro'yxatdan o'tish</button>
+    </form>
+  </section>
+</main>
+<script src="../static/app.js"></script>
+</body>
+</html>

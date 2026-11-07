@@ -1,0 +1,36 @@
+{% extends "app_base.html" %}
+{% block title %}Diagnostik test{% endblock %}
+{% block content %}
+<div id="msg" class="msg" role="alert" hidden></div>
+<section class="box">
+  <h1>Diagnostik test</h1>
+  <p>Bu test tarix fanidan hozirgi bilim darajangizni aniqlaydi. Savollar barcha mavzulardan olinadi
+     (har bir mavzudan {{ per_topic }} tadan, jami {{ n_topics * per_topic }} tagacha savol).</p>
+  <ul class="list tight">
+    <li>Har bir savolda 4 ta variant bor, faqat bittasi to'g'ri.</li>
+    <li>Natijaga qarab sizga <b>o'rganish kerak bo'lgan mavzular</b> tavsiya etiladi.</li>
+    <li>Testni istagan vaqtda qayta topshirishingiz mumkin.</li>
+  </ul>
+  {% if n_topics %}
+    <button class="btn inline" type="button" data-start-url="/api/diagnostic/start">Testni boshlash</button>
+  {% else %}
+    <p class="muted">Diagnostik savollar hali kiritilmagan.</p>
+  {% endif %}
+</section>
+
+<section class="box">
+  <h3>Oldingi urinishlar</h3>
+  {% if history %}
+  <div class="table-wrap"><table>
+    <tr><th>Sana</th><th>Natija</th><th></th></tr>
+    {% for a in history %}
+      <tr>
+        <td>{{ a.finished_at | dt }}</td>
+        <td><b>{{ a.score | pct(a.total) }}%</b> ({{ a.score }}/{{ a.total }})</td>
+        <td><a href="/result/{{ a.id }}">Ko'rish</a></td>
+      </tr>
+    {% endfor %}
+  </table></div>
+  {% else %}<p class="muted">Hali topshirilmagan.</p>{% endif %}
+</section>
+{% endblock %}

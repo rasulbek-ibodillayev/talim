@@ -1,0 +1,21 @@
+{% extends "app_base.html" %}
+{% block title %}Foydalanuvchilar{% endblock %}
+{% block content %}
+<a class="back" href="/admin">← Admin</a>
+<h1>Foydalanuvchilar ({{ users|length }})</h1>
+<section class="box">
+  <div class="table-wrap"><table>
+    <tr><th>Ism familiya</th><th>Telefon</th><th>Hudud</th><th>Diagnostika</th><th>O'zlashtirilgan</th><th>Ro'yxatdan o'tgan</th></tr>
+    {% for u in users %}
+    <tr>
+      <td>{{ u.first_name }} {{ u.last_name }}</td>
+      <td>{{ u.phone }}</td>
+      <td>{{ u.region }}</td>
+      <td>{{ (u.diag ~ '%') if u.diag is not none else '-' }}</td>
+      <td>{{ u.passed_cnt }} / {{ n_topics }}</td>
+      <td>{{ u.created_at | dt }}</td>
+    </tr>
+    {% else %}<tr><td colspan="6" class="muted">Hali foydalanuvchi yo'q</td></tr>{% endfor %}
+  </table></div>
+</section>
+{% endblock %}

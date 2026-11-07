@@ -1,0 +1,15 @@
+{% macro avatar(u, size='') -%}
+{%- if u.avatar -%}
+<img class="avatar {{ size }}" src="/avatar/{{ u.avatar }}" alt="">
+{%- else -%}
+<span class="avatar {{ size }}">{{ ((u.first_name or '')[:1] ~ (u.last_name or '')[:1])|upper }}</span>
+{%- endif -%}
+{%- endmacro %}
+
+{% macro bar(p) -%}
+<div class="bar"><i style="width: {{ p }}%"></i></div>
+{%- endmacro %}
+
+{% macro badge(status, label) -%}
+<span class="badge {{ status }}">{{ label }}</span>
+{%- endmacro %}

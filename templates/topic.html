@@ -1,0 +1,59 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import bar, badge %}
+{% block title %}{{ topic.title }}{% endblock %}
+{% block content %}
+<a class="back" href="/path">← Mavzular</a>
+<div id="msg" class="msg" role="alert" hidden></div>
+<section class="box">
+  <div class="topic-head">
+    <h1>{{ topic.title }}</h1>
+    {% if info %}{{ badge(info.status, info.label) }}{% endif %}
+  </div>
+  <p class="muted">{{ topic.summary }}</p>
+  {% if info and info.diag_percent is not none %}
+    <p class="small-t">Diagnostikadagi natijangiz: <b>{{ info.diag_percent }}%</b></p>
+  {% endif %}
+</section>
+
+{% for m in materials %}
+<article class="box material">
+  <h2>{{ loop.index }}. {{ m.title }}</h2>
+  <div class="text">{% for p in m.body | paragraphs %}<p>{{ p }}</p>{% endfor %}</div>
+  {% if m.url %}<p><a href="{{ m.url }}" target="_blank" rel="noopener noreferrer">Qo'shimcha manba ↗</a></p>{% endif %}
+  <button type="button" class="ghost read-btn {{ 'done' if m.read }}" data-id="{{ m.id }}" {{ 'disabled' if m.read }}>
+    {{ "✓ O'qilgan" if m.read else "O'qib chiqdim" }}
+  </button>
+</article>
+{% else %}
+<section class="box"><p class="muted">Bu mavzuga hali material kiritilmagan.</p></section>
+{% endfor %}
+
+<section class="box test-box" id="test-box" data-total="{{ materials|length }}" data-read="{{ read_count }}">
+  <h2>Mavzu testi</h2>
+  {% if not n_questions %}
+    <p class="muted">Bu mavzu uchun test savollari hali kiritilmagan.</p>
+  {% else %}
+    <p class="muted">Materiallarni o'qib chiqqach test topshiring. O'tish uchun kamida <b>{{ pass_percent }}%</b> kerak.</p>
+    <p class="small-t" id="read-hint" {{ 'hidden' if read_count == materials|length }}>
+      Materiallar: <b id="read-count">{{ read_count }}</b>/{{ materials|length }}. Testni boshlash uchun hammasini o'qib chiqing.
+    </p>
+    <button class="btn inline" id="test-btn" type="button" data-start-url="/api/topic/{{ topic.id }}/test/start"
+            {{ 'disabled' if read_count < materials|length }}>
+      {{ 'Testni qayta topshirish' if info and info.attempts else 'Testni boshlash' }}
+    </button>
+  {% endif %}
+  {% if attempts %}
+    <h3>Oldingi urinishlar</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Sana</th><th>Natija</th><th></th></tr>
+      {% for a in attempts %}
+        <tr>
+          <td>{{ a.finished_at | dt }}</td>
+          <td><b>{{ a.score | pct(a.total) }}%</b> ({{ a.score }}/{{ a.total }})</td>
+          <td><a href="/result/{{ a.id }}">Ko'rish</a></td>
+        </tr>
+      {% endfor %}
+    </table></div>
+  {% endif %}
+</section>
+{% endblock %}

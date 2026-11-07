@@ -1,0 +1,17 @@
+{% extends "app_base.html" %}
+{% block title %}Savolni tahrirlash{% endblock %}
+{% block content %}
+<a class="back" href="/admin/topic/{{ q.topic_id }}#questions">← Mavzuga qaytish</a>
+<h1>Savolni tahrirlash</h1>
+<section class="box">
+  <form method="post">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    {% include "admin/_question_fields.html" %}
+    <button class="btn inline" type="submit">Saqlash</button>
+  </form>
+  <form method="post" action="/admin/question/{{ q.id }}/delete" data-confirm="Savol o'chirilsinmi?">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <button class="ghost danger" type="submit">Savolni o'chirish</button>
+  </form>
+</section>
+{% endblock %}
