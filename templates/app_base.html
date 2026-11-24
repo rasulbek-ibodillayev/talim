@@ -1,0 +1,25 @@
+{# O'quvchi paneli #}
+{% extends "layout.html" %}
+{% from "_macros.html" import avatar, nav_link %}
+{% block brand %}<a class="brand" href="/dashboard"><span class="brand-mark">T</span><span class="brand-name">Tarix Ustoz<small>Tarix fanidan tayyorgarlik</small></span></a>{% endblock %}
+{% block sidebar %}
+    {% set p = request.path %}
+    {% set nk = exam_nav_kind if exam_nav_kind is defined else none %}
+    <nav class="nav-group">
+      <div class="nav-label">O'qish</div>
+      {{ nav_link('/dashboard', 'home', 'Bosh sahifa', p == '/dashboard' or p == '/welcome' or p.startswith('/topic')) }}
+    </nav>
+    <nav class="nav-group">
+      <div class="nav-label">Testlar</div>
+      {{ nav_link('/exams/olympiad', 'olympiad', 'Olimpiada', p == '/exams/olympiad' or nk == 'olympiad') }}
+      {{ nav_link('/exams/certificate', 'certificate', 'Milliy sertifikat', p == '/exams/certificate' or nk == 'certificate') }}
+      {{ nav_link('/exams/dtm', 'dtm', 'DTM testlari', p == '/exams/dtm' or nk == 'dtm') }}
+    </nav>
+    <nav class="nav-group">
+      <div class="nav-label">Mening</div>
+      {{ nav_link('/results', 'chart', 'Natijalarim', p.startswith('/result') and not nk) }}
+      {{ nav_link('/mistakes', 'flag', 'Xatolarim', p.startswith('/mistakes')) }}
+      {{ nav_link('/profile', 'user', 'Profil', p.startswith('/profile')) }}
+    </nav>
+{% endblock %}
+{% block me %}<a class="me" href="/profile">{{ avatar(user) }}<span><span class="me-name">{{ user.first_name }} {{ user.last_name }}</span><br><span class="me-sub">O'quvchi</span></span></a>{% endblock %}

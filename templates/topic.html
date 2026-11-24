@@ -1,0 +1,113 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import bar, badge, icon, attempts_table %}
+{% block title %}{{ topic.title }}{% endblock %}
+{% block content %}
+<nav class="crumbs"><a href="/dashboard">Bosh sahifa</a> {{ icon('right') }} <span>{{ topic.title }}</span></nav>
+<div class="page-head">
+  <div>
+    {% if info and info.n is defined %}<span class="eyebrow">{{ info.n }}-dars</span>{% endif %}
+    <h1>{{ topic.title }}</h1>
+    {% if topic.summary %}<p>{{ topic.summary }}</p>{% endif %}
+  </div>
+  <div class="actions">
+    {% if info and info.level %}{{ badge(levels[info.level][1], levels[info.level][0] ~ ' daraja') }}{% endif %}
+    {% if info %}{{ badge(states[info.state][1], states[info.state][0]) }}{% endif %}
+  </div>
+</div>
+
+{% if info and info.passed and info.first_failed and read_count < materials|length %}
+<div class="flash info">{{ icon('refresh') }}<span>Mavzuni qayta o'zlashtirmoqdasiz. Materiallarni o'qib chiqqach, testni yana topshirishingiz mumkin. Oldingi natijangiz saqlanadi.</span></div>
+{% elif info and info.state == 'done' and next_topic %}
+<div class="flash ok">{{ icon('check') }}<span>Bu dars o'zlashtirilgan. Keyingi dars: <a href="/topic/{{ next_topic.id }}">{{ next_topic.title }}</a></span></div>
+{% elif info and info.attempts and not info.passed and info.state == 'current' %}
+<div class="flash warn">{{ icon('refresh') }}<span>Mavzu testidan o'tish uchun {{ st.pass_percent }}% kerak edi (eng yaxshi natijangiz: {{ info.best_percent }}%). Mavzuni qayta o'zlashtirish kerak: materiallarni qaytadan o'qib, testni yana topshiring.</span></div>
+{% endif %}
+
+<div class="grid side">
+  <div>
+    {% for m in materials %}
+    <article class="card material" id="m{{ m.id }}">
+      <div class="material-head">
+        <span class="material-num">{{ loop.index }}-material</span>
+        {% if m.read %}<span class="badge ok">{{ icon('check') }} O'qilgan</span>{% endif %}
+      </div>
+      <h2>{{ m.title }}</h2>
+      {% if m.image %}<img class="material-img" src="/material-image/{{ m.id }}" alt="{{ m.title }}" loading="lazy">{% endif %}
+      {% if m.body %}<div class="text">{% for p in m.body | paragraphs %}<p>{{ p }}</p>{% endfor %}</div>{% endif %}
+      {% set links = m.url | links %}
+      {% if links %}
+        <div class="link-list">
+          {% for title, url in links %}<a href="{{ url }}" target="_blank" rel="noopener noreferrer">{{ icon('link') }} {{ title }} {{ icon('external') }}</a>{% endfor %}
+        </div>
+      {% endif %}
+      <div class="actions mt">
+        <button type="button" class="ghost sm read-btn {{ 'done' if m.read }}" data-id="{{ m.id }}" {{ 'disabled' if m.read }}>
+          {{ icon('check') }} <span>{{ "O'qilgan" if m.read else "O'qib chiqdim" }}</span>
+        </button>
+      </div>
+    </article>
+    {% else %}
+    <section class="card empty">{{ icon('book') }}<p>Bu mavzuga hali material kiritilmagan.</p></section>
+    {% endfor %}
+
+    {% if files %}
+    <section class="card">
+      <h2>Fayllar</h2>
+      <ul class="list">
+        {% for f in files %}
+          <li><span class="stat-icon {{ 'err' if f.stored.endswith('.pdf') else '' }}">{{ icon('file') }}</span>
+            <div class="grow"><div class="title">{{ f.name }}</div><div class="muted small">{{ f.stored.rsplit('.', 1)[1]|upper }} · {{ f.size|filesize }}</div></div>
+            <a class="ghost sm" href="/file/{{ f.id }}">{{ icon('download') }} Yuklab olish</a></li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+  </div>
+
+  <aside class="sticky">
+    <section class="card" id="test-box">
+      <h3>Dars jarayoni</h3>
+      <div class="actions between small mb-0"><span class="muted">Materiallar</span><b><span id="read-count">{{ read_count }}</span>/{{ materials|length }}</b></div>
+      {% set rp = ((100 * read_count / materials|length) | round | int) if materials else 0 %}
+      <div class="bar ok mb" id="read-bar"><i style="width: {{ rp }}%"></i></div>
+      {% if info and info.diag_percent is not none %}
+        <div class="actions between small"><span class="muted">Diagnostika</span><b>{{ info.diag_percent }}%</b></div>
+      {% endif %}
+      {% if info and info.best_percent is not none %}
+        <div class="actions between small"><span class="muted">Eng yaxshi test</span><b>{{ info.best_percent }}%</b></div>
+      {% endif %}
+      <hr class="sep">
+      <h3>Mavzu testi</h3>
+      {% if not n_test %}
+        <p class="muted small">Bu mavzu uchun test savollari hali kiritilmagan. Materiallarni o'qib chiqsangiz, dars o'tilgan hisoblanadi.</p>
+      {% elif pending %}
+        <p class="muted small">Boshlangan testni yakunlang.</p>
+        <a class="btn block" href="/quiz/{{ pending.id }}">{{ icon('play') }} Testni davom ettirish</a>
+      {% elif not can_test %}
+        <p class="muted small">{{ "Bu mavzu dars rejangizga kirmaydi." if info and info.state == 'skipped' else "Siz bu mavzu testidan o'tgansiz." }}</p>
+      {% elif not test_count %}
+        <p class="small">{{ icon('alert') }} {{ no_fresh }}</p>
+      {% else %}
+        <ul class="kv small">
+          <li><span>Savollar</span><b>{{ test_count }} ta</b></li>
+          <li><span>Vaqt</span><b>{{ (test_time ~ ' daqiqa') if test_time else 'cheklanmagan' }}</b></li>
+          <li><span>1 savol balli</span><b>{{ test_points|num }}</b></li>
+          <li><span>O'tish foizi</span><b>{{ st.pass_percent }}%</b></li>
+        </ul>
+        <p class="small" id="read-hint" {{ 'hidden' if read_count >= materials|length }}>{{ icon('lock') }} Testni ochish uchun barcha materiallarni o'qib chiqing.</p>
+        <button class="btn block" id="test-btn" type="button" data-start-url="/api/topic/{{ topic.id }}/test/start"
+                {{ 'disabled' if read_count < materials|length }}>
+          {{ icon('play') }} {{ 'Testni qayta topshirish' if info and info.attempts else 'Testni boshlash' }}
+        </button>
+      {% endif %}
+    </section>
+  </aside>
+</div>
+
+{% if attempts %}
+<section class="card flush">
+  <div class="card-pad card-head mb-0"><h2>Oldingi urinishlar</h2></div>
+  {{ attempts_table(attempts, false) }}
+</section>
+{% endif %}
+{% endblock %}

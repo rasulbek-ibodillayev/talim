@@ -1,0 +1,103 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import bar, icon, ring %}
+{% block title %}Natija · {{ title }}{% endblock %}
+{% block content %}
+{% set tone = 'ok' if percent >= 80 else ('' if percent >= pass_percent else ('warn' if percent >= 40 else 'err')) %}
+{% set n_bad = counts.wrong + counts.skip + counts.idk %}
+<nav class="crumbs"><a href="{{ back }}">{{ icon('left') }} {{ title }}</a></nav>
+
+<section class="card">
+  <div class="result-hero">
+    {{ ring(percent, 'natija', tone) }}
+    <div>
+      <span class="eyebrow">{{ kind_label }} · {{ a.finished_at | dt }}</span>
+      <h1>
+        {% if a.kind == 'topic' %}{{ "Dars o'zlashtirildi! Keyingi dars ochildi" if passed else "Bu safar yetarli emas" }}
+        {% elif percent >= 80 %}A'lo natija!
+        {% elif percent >= pass_percent %}Yaxshi natija
+        {% else %}Bilimingizni mustahkamlash kerak{% endif %}
+      </h1>
+      <p class="text-2 mb-0">
+        {{ title }}.
+        {% if a.kind == 'topic' and not passed %}O'tish uchun kamida {{ pass_percent }}% kerak. Mavzuni qayta o'zlashtiring va testni yana topshiring. Mavzu «Xatolarim» bo'limida ham turadi.{% endif %}
+        {% if a.kind == 'diagnostic' %}Dars rejangiz shu natija asosida tuzildi.{% endif %}
+      </p>
+      <div class="result-stats">
+        <div class="rs"><b>{{ points|num }}<small class="muted"> / {{ max_points|num }}</small></b><span>Ball</span></div>
+        <div class="rs ok"><b>{{ counts.right }}</b><span>To'g'ri</span></div>
+        <div class="rs err"><b>{{ counts.wrong }}</b><span>Xato</span></div>
+        <div class="rs"><b>{{ counts.idk + counts.skip }}</b><span>Bilmayman / javobsiz</span></div>
+      </div>
+      <p class="muted small mt mb-0">{{ icon('clock') }} Sarflangan vaqt: {{ duration // 60 }} daq {{ duration % 60 }} son</p>
+    </div>
+  </div>
+  <div class="actions mt no-print">
+    {% if a.kind == 'diagnostic' %}
+      <a class="btn" href="/dashboard">{{ icon('plan') }} Dars rejani ko'rish</a>
+    {% elif a.kind == 'exam' %}
+      {% if exam and exam.published %}<button class="btn" type="button" data-start-url="/api/exam/{{ exam.id }}/start">{{ icon('refresh') }} Qayta ishlash</button>{% endif %}
+      {% if exam %}<a class="ghost" href="/exams/{{ exam.kind }}">Boshqa testlar</a>{% endif %}
+    {% else %}
+      {% if passed and next_topic %}<a class="btn" href="/topic/{{ next_topic.id }}">Keyingi dars: {{ next_topic.title }} {{ icon('right') }}</a>
+      {% elif not passed %}<a class="btn" href="/topic/{{ a.topic_id }}">{{ icon('book') }} Mavzuni qayta o'zlashtirish</a>{% endif %}
+    {% endif %}
+    <button class="ghost" type="button" onclick="window.print()">Chop etish</button>
+  </div>
+</section>
+
+{% if sections %}
+<section class="card">
+  <h2>Bloklar bo'yicha</h2>
+  {% for s in sections %}
+    <div class="topic-row">
+      <div><b>{{ s.name }}</b><div class="muted small">{{ s.right }}/{{ s.total }} to'g'ri</div></div>
+      {{ bar((100 * s.right / s.total)|round|int if s.total else 0) }}
+      <span class="pct">{{ s.points|num }}/{{ s.max|num }}</span>
+    </div>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% if topics_res and a.kind != 'topic' %}
+<div class="grid two section">
+  <section class="card mb-0">
+    <h2>Mavzular bo'yicha natija</h2>
+    {% for t in topics_res|sort(attribute='percent') %}
+      <div class="topic-row">
+        <div>{% if t.available %}<a href="/topic/{{ t.id }}">{{ t.title }}</a>{% else %}{{ t.title }}{% endif %}<div class="muted small">{{ t.correct }}/{{ t.total }} to'g'ri</div></div>
+        {{ bar(t.percent, 'ok' if t.percent >= 80 else ('' if t.percent >= pass_percent else 'err')) }}
+        <span class="pct">{{ t.percent }}%</span>
+      </div>
+    {% endfor %}
+  </section>
+  <section class="card mb-0">
+    {% if weak %}
+      <h2>Bilim kam bo'lgan mavzular</h2>
+      <p class="muted small">{{ "Bu mavzular dars rejangizga kiritildi." if a.kind == 'diagnostic' else "Shu mavzularni takrorlash tavsiya etiladi." }}</p>
+      <ul class="list">
+        {% for t in weak %}
+          <li><span class="badge err">{{ t.percent }}%</span><div class="grow title">{{ t.title }}</div>{% if t.available %}<a class="ghost sm" href="/topic/{{ t.id }}">O'rganish</a>{% endif %}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="empty">{{ icon('star', 'xl') }}<h3>Barcha mavzular bo'yicha yaxshi natija</h3><p>Bilim kam mavzu aniqlanmadi.</p></div>
+    {% endif %}
+  </section>
+</div>
+{% endif %}
+
+<section class="card" id="review">
+  <div class="card-head">
+    <h2>Javoblar tahlili</h2>
+    <div class="tabs no-print" role="tablist" id="review-tabs">
+      <button class="tab {{ 'active' if n_bad }}" data-filter="mistakes" type="button">Xatolar <span class="count">{{ n_bad }}</span></button>
+      <button class="tab {{ 'active' if not n_bad }}" data-filter="all" type="button">Hammasi <span class="count">{{ review|length }}</span></button>
+      <button class="tab" data-filter="right" type="button">To'g'ri <span class="count">{{ counts.right }}</span></button>
+    </div>
+  </div>
+  <p class="empty" id="review-empty" hidden>Bu bo'limda savol yo'q.</p>
+  {% for q in review %}
+    {% include "_review_item.html" %}
+  {% endfor %}
+</section>
+{% endblock %}

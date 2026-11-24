@@ -1,0 +1,31 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import icon %}
+{% block title %}Xush kelibsiz{% endblock %}
+{% block page_class %}narrow{% endblock %}
+{% block content %}
+<section class="card hero" style="grid-template-columns: minmax(0, 1fr)">
+  <div>
+    <span class="eyebrow">Xush kelibsiz, {{ user.first_name }}!</span>
+    <h1>Avval bilim darajangizni aniqlaymiz</h1>
+    <p>Diagnostik test admin tuzgan mavzular bo'yicha ketma-ket savollar beradi va har bir mavzu bo'yicha bilimingizni aniqlaydi. Yaxshi biladigan mavzularingiz chiqarib tashlanib, qolganlaridan sizga shaxsiy <b>dars reja</b> tuziladi.</p>
+  </div>
+</section>
+
+<div class="grid two">
+  <section class="card mb-0">
+    <div class="stat-icon mb">{{ icon('target', 'lg') }}</div>
+    <h2>Diagnostikani ishlash</h2>
+    <p class="text-2">{% if n_topics %}{{ n_topics }} ta mavzudan {{ n_questions }} ta savol.{% else %}Diagnostika savollari hali kiritilmagan.{% endif %}{% if st.diag_time %} Vaqt: {{ st.diag_time }} daqiqa.{% else %} Vaqt cheklanmagan.{% endif %} Bilmagan savolingizni «Bilmayman» deb o'tkazishingiz mumkin.</p>
+    <p class="muted small">Tavsiya etiladi: dars reja faqat sizga kerakli mavzulardan tuziladi va vaqtingiz tejaladi.</p>
+    {% if pending %}<a class="btn block lg" href="/quiz/{{ pending.id }}">{{ icon('play') }} Diagnostikani davom ettirish</a>
+    {% else %}<button class="btn block lg" type="button" data-start-url="/api/diagnostic/start" {{ 'disabled' if not n_topics }}>{{ icon('play') }} Diagnostikani boshlash</button>{% endif %}
+  </section>
+  <section class="card mb-0">
+    <div class="stat-icon accent mb">{{ icon('book', 'lg') }}</div>
+    <h2>Rad etish</h2>
+    <p class="text-2">Diagnostikasiz boshlasangiz, dars reja admin tuzgan barcha mavzulardan tuziladi va birinchi mavzudan boshlanadi.</p>
+    <p class="muted small">Diagnostika faqat birinchi kirishda taklif qilinadi, keyin ishlab bo'lmaydi.</p>
+    <button class="ghost block lg" type="button" id="decline-diag" {{ 'disabled' if pending }}>Diagnostikasiz boshlash {{ icon('right') }}</button>
+  </section>
+</div>
+{% endblock %}

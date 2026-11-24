@@ -1,0 +1,6 @@
+<div class="form-grid">
+  <label class="full">Mavzu nomi <input name="title" maxlength="120" value="{{ topic.title if topic else '' }}" required></label>
+  <label class="full">Qisqacha tavsif <input name="summary" maxlength="300" value="{{ topic.summary if topic else '' }}"></label>
+  <label>Tartib raqami <input name="position" type="number" value="{{ topic.position if topic else (topics|length if topics is defined else 0) + 1 }}"></label>
+  <label class="check" style="align-self: end"><input type="checkbox" name="published" {{ 'checked' if not topic or topic.published }}> O'quvchilarga ko'rinsin</label>
+</div>

@@ -1,0 +1,69 @@
+{% extends "admin/base.html" %}
+{% from "_macros.html" import icon, bar, pct_badge %}
+{% block title %}Foydalanuvchilar · Admin{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Foydalanuvchilar</h1><p>Statistika va har bir o'quvchi haqida batafsil ma'lumot.</p></div>
+</div>
+
+<div class="grid four section">
+  <div class="card stat"><div class="stat-icon">{{ icon('users', 'lg') }}</div><div><div class="stat-value">{{ stats.total }}</div><div class="stat-label">Jami · +{{ stats.new_week }} shu hafta</div></div></div>
+  <div class="card stat"><div class="stat-icon ok">{{ icon('clock', 'lg') }}</div><div><div class="stat-value">{{ stats.active_week }}</div><div class="stat-label">Faol (7 kun)</div></div></div>
+  <div class="card stat"><div class="stat-icon accent">{{ icon('target', 'lg') }}</div><div><div class="stat-value">{{ stats.diag_done }}</div><div class="stat-label">Diagnostikadan o'tgan · {{ stats.declined }} rad etgan</div></div></div>
+  <div class="card stat"><div class="stat-icon">{{ icon('chart', 'lg') }}</div><div><div class="stat-value">{{ stats.avg }}%</div><div class="stat-label">O'rtacha natija · {{ stats.attempts }} test</div></div></div>
+</div>
+
+<section class="card">
+    <h3>Mavzular bo'yicha</h3>
+    <p class="muted small">Diagnostikadagi o'rtacha foiz va mavzu testidan o'tganlar.</p>
+    {% for t in topic_stats %}
+      <div class="topic-row">
+        <div class="small">{{ t.title }}<div class="muted">{{ t.n_passed or 0 }} kishi o'tgan</div></div>
+        {{ bar(t.avg_diag|int if t.avg_diag is not none else 0, 'ok' if (t.avg_diag or 0) >= st.high_percent else ('' if (t.avg_diag or 0) >= st.pass_percent else 'err')) }}
+        <span class="pct small">{{ (t.avg_diag|int ~ '%') if t.avg_diag is not none else '—' }}</span>
+      </div>
+    {% else %}<p class="muted">Ma'lumot yo'q.</p>{% endfor %}
+</section>
+<div class="grid two section">
+  <section class="card mb-0">
+    <h3>Test turlari bo'yicha</h3>
+    {% set names = {'diagnostic': 'Diagnostika', 'topic': 'Mavzu testlari', 'olympiad': 'Olimpiada', 'certificate': 'Milliy sertifikat', 'dtm': 'DTM'} %}
+    <ul class="list">
+      {% for k in kinds_stats %}
+        <li><div class="grow">{{ names.get(k.k, k.k) }}<div class="muted small">{{ k.n }} ta urinish</div></div>{{ pct_badge(k.avg|int) }}</li>
+      {% else %}<li class="muted">Hali test ishlanmagan.</li>{% endfor %}
+    </ul>
+  </section>
+  <section class="card mb-0">
+    <h3>Hududlar bo'yicha</h3>
+    <ul class="list">
+      {% for r in regions %}<li><div class="grow small">{{ r.region }}</div><b>{{ r.n }}</b></li>{% endfor %}
+    </ul>
+  </section>
+</div>
+
+<section class="card flush">
+  <div class="card-pad card-head mb-0">
+    <h2>Ro'yxat ({{ users|length }})</h2>
+    <form method="get" class="search-form"><input name="q" value="{{ q }}" placeholder="Ism, telefon yoki hudud..." aria-label="Qidirish"><button class="ghost sm" type="submit">{{ icon('search') }}</button></form>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Foydalanuvchi</th><th>Telefon</th><th>Hudud</th><th class="num">Diagnostika</th><th class="num">O'tilgan dars</th><th class="num">Testlar</th><th class="num">O'rtacha</th><th>Oxirgi faollik</th><th></th></tr></thead>
+    <tbody>
+    {% for u in users %}
+    <tr>
+      <td><a class="title" href="/admin/user/{{ u.id }}">{{ u.first_name }} {{ u.last_name }}</a>{% if u.diag_declined %} <span class="badge new" title="Diagnostikani rad etgan">rad</span>{% endif %}</td>
+      <td class="nowrap">{{ u.phone }}</td>
+      <td class="small">{{ u.region }}</td>
+      <td class="num">{% if u.diag is not none %}{{ pct_badge(u.diag) }}{% else %}<span class="muted">—</span>{% endif %}</td>
+      <td class="num">{{ u.passed_cnt }} / {{ n_topics }}</td>
+      <td class="num">{{ u.n_att }}</td>
+      <td class="num">{{ (u.avg_pct|int ~ '%') if u.avg_pct is not none else '—' }}</td>
+      <td class="nowrap muted small">{{ u.last_seen | dt }}</td>
+      <td class="num"><a class="ghost sm" href="/admin/user/{{ u.id }}">Batafsil</a></td>
+    </tr>
+    {% else %}<tr><td colspan="9" class="empty">Foydalanuvchi topilmadi</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+</section>
+{% endblock %}

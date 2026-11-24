@@ -1,0 +1,88 @@
+{% extends "admin/base.html" %}
+{% from "_macros.html" import icon %}
+{% block title %}{{ exam.title }} · Admin{% endblock %}
+{% block content %}
+{% set exam_kind = exam.kind %}
+<nav class="crumbs"><a href="/admin/exams?kind={{ exam.kind }}">{{ kinds[exam.kind][0] }}</a> {{ icon('right') }} <span>{{ exam.title }}</span></nav>
+<div class="page-head">
+  <div><h1>{{ exam.title }}</h1>
+    <p>{{ exam.n_q }} savol · {{ exam.max_points|num }} ball · {{ exam.time_limit }} daqiqa
+      {% if exam.kind == 'dtm' %}· bankda: majburiy {{ exam.n_a }}, mutaxassislik {{ exam.n_b }}{% else %}· bankda {{ exam.n_a + exam.n_b }}{% endif %}</p></div>
+</div>
+
+{% if exam.kind == 'dtm' and (exam.n_a < st.dtm_mandatory_count or exam.n_b < st.dtm_special_count) %}
+<div class="flash warn">{{ icon('alert') }}<span>To'liq DTM testi uchun majburiy blokda kamida {{ st.dtm_mandatory_count }} ta (hozir {{ exam.n_a }}), mutaxassislik blokida kamida {{ st.dtm_special_count }} ta (hozir {{ exam.n_b }}) savol kerak.</span></div>
+{% elif exam.kind != 'dtm' and exam.n_a + exam.n_b < st[exam.kind ~ '_count'] %}
+<div class="flash warn">{{ icon('alert') }}<span>Test sozlamalariga ko'ra testda {{ st[exam.kind ~ '_count'] }} ta savol bo'lishi kerak, bankda hozir {{ exam.n_a + exam.n_b }} ta.</span></div>
+{% endif %}
+
+<details class="card">
+  <summary>Ball, vaqt va holat</summary>
+  <form method="post" action="/admin/exam/{{ exam.id }}/save">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    {% set e = exam %}
+    {% include "admin/_exam_fields.html" %}
+    <div class="actions between">
+      <button class="btn" type="submit">Saqlash</button>
+      <button class="ghost danger" type="submit" form="del-exam">{{ icon('trash') }} Testni o'chirish</button>
+    </div>
+  </form>
+  <form method="post" id="del-exam" action="/admin/exam/{{ exam.id }}/delete" data-confirm="Test va uning barcha savollari o'chiriladi. Davom etasizmi?">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  </form>
+</details>
+
+<section class="card" id="questions">
+  <div class="card-head"><h2>Savollar banki ({{ questions|length }})</h2><a class="ghost sm" href="/admin/template/exam.xlsx">{{ icon('download') }} Excel namunasi</a></div>
+  <div class="table-wrap mb"><table class="admin-q">
+    <thead><tr><th class="num">№</th>{% if exam.kind == 'dtm' %}<th>Blok</th>{% endif %}<th>Savol</th><th>Mavzu</th><th>Javob</th><th></th></tr></thead>
+    <tbody>
+    {% for q in questions %}
+    <tr>
+      <td class="num muted">{{ loop.index }}</td>
+      {% if exam.kind == 'dtm' %}<td>{% if q.section == 'b' %}<span class="badge accent">Spes</span>{% else %}<span class="badge brand">Majburiy</span>{% endif %}</td>{% endif %}
+      <td>{{ q.text }}</td>
+      <td>{% if q.topic_title %}<span class="badge">{{ q.topic_title|truncate(28) }}</span>{% else %}<span class="muted">—</span>{% endif %}</td>
+      <td class="ans">{{ 'ABCD'[q.correct - 1] }}</td>
+      <td class="num"><a class="ghost sm" href="/admin/exam-question/{{ q.id }}">{{ icon('edit') }}</a></td>
+    </tr>
+    {% else %}<tr><td colspan="6" class="empty">Savol yo'q. Quyida qo'shing yoki Excel orqali yuklang.</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+
+  <div class="grid three">
+    <details class="card mb-0">
+      <summary>Bittalab qo'shish</summary>
+      <form method="post" action="/admin/exam/{{ exam.id }}/question">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        {% set exam_mode = true %}
+        {% include "admin/_question_fields.html" %}
+        <button class="btn" type="submit">Qo'shish</button>
+      </form>
+    </details>
+    <details class="card mb-0" open>
+      <summary>Excel fayldan yuklash</summary>
+      <form method="post" action="/admin/exam/{{ exam.id }}/import-xlsx" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <p class="small text-2">Avval <a href="/admin/template/exam.xlsx">namunani yuklab oling</a>.{% if exam.kind == 'dtm' %} «Bo'lim» ustuniga «Majburiy» yoki «Mutaxassislik» yozing.{% endif %} «Mavzu» ustuni ixtiyoriy.</p>
+        <label>Excel fayl (.xlsx) <input type="file" name="file" accept=".xlsx" required></label>
+        <button class="btn" type="submit">{{ icon('upload') }} Yuklash</button>
+      </form>
+    </details>
+    <details class="card mb-0">
+      <summary>Matndan import</summary>
+      <form method="post" action="/admin/exam/{{ exam.id }}/import">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        {% if exam.kind == 'dtm' %}
+        <label>Blok <select name="section"><option value="a">Majburiy</option><option value="b">Mutaxassislik (spes)</option></select></label>
+        {% endif %}
+        <label>Mavzu
+          <select name="topic_id"><option value="">— Belgilanmagan —</option>{% for t in topics %}<option value="{{ t.id }}">{{ t.title }}</option>{% endfor %}</select>
+        </label>
+        <label>Savollar <textarea name="text" rows="8" placeholder="Savol?&#10;A) ...&#10;B) ...&#10;C) ...&#10;D) ...&#10;Javob: B"></textarea></label>
+        <button class="btn" type="submit">{{ icon('upload') }} Import</button>
+      </form>
+    </details>
+  </div>
+</section>
+{% endblock %}

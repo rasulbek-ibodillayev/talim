@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <title>{% block title %}{% endblock %} · {% block site_name %}Tarix Ustoz{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/static/style.css?v=7">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+{% from "_macros.html" import avatar, icon %}
+{# Umumiy karkas. O'quvchi paneli: app_base.html, admin paneli: admin/base.html #}
+<div class="shell">
+  <aside class="sidebar" id="sidebar" aria-label="Asosiy menyu">
+    {% block brand %}{% endblock %}
+    {% block sidebar %}{% endblock %}
+    <div class="sidebar-foot">
+      {% block me %}{% endblock %}
+      <button class="nav-link logout" id="logout" type="button">{{ icon('logout') }}<span>Chiqish</span></button>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <div class="main">
+    <header class="topbar">
+      {{ self.brand() }}
+      <button class="menu-btn" id="menu-btn" type="button" aria-label="Menyuni ochish" aria-controls="sidebar">{{ icon('menu', 'lg') }}</button>
+    </header>
+    <main class="page {% block page_class %}{% endblock %}">
+      {% for cat, m in get_flashed_messages(with_categories=true) %}
+        <div class="flash {{ cat }}">{{ icon('check' if cat == 'ok' else 'alert') }}<span>{{ m }}</span></div>
+      {% endfor %}
+      <div id="msg" class="msg" role="alert" hidden></div>
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+<script>window.CSRF = {{ csrf_token()|tojson }};</script>
+<script src="/static/learn.js?v=6"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

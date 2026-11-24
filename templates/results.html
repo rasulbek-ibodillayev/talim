@@ -1,0 +1,25 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import icon, attempts_table %}
+{% block title %}Natijalarim{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><span class="eyebrow">Mening</span><h1>Natijalarim</h1><p>Ishlagan barcha testlaringiz. Natijani ko'rish uchun ustiga bosing.</p></div>
+</div>
+
+<div class="grid three section">
+  <div class="card stat"><div class="stat-icon">{{ icon('check', 'lg') }}</div><div><div class="stat-value">{{ stats.n }}</div><div class="stat-label">Topshirilgan test</div></div></div>
+  <div class="card stat"><div class="stat-icon accent">{{ icon('chart', 'lg') }}</div><div><div class="stat-value">{{ stats.avg }}%</div><div class="stat-label">O'rtacha natija</div></div></div>
+  <div class="card stat"><div class="stat-icon ok">{{ icon('star', 'lg') }}</div><div><div class="stat-value">{{ stats.best }}%</div><div class="stat-label">Eng yaxshi natija</div></div></div>
+</div>
+
+<div class="tabs mb">
+  {% for key, label in [('all', 'Hammasi'), ('diagnostic', 'Diagnostika'), ('topic', 'Mavzu testlari'), ('olympiad', 'Olimpiada'), ('certificate', 'Milliy sertifikat'), ('dtm', 'DTM')] %}
+    <a class="tab {{ 'active' if f == key }}" href="?f={{ key }}">{{ label }}</a>
+  {% endfor %}
+</div>
+
+<section class="card flush">
+  {% if rows %}{{ attempts_table(rows) }}
+  {% else %}<div class="empty">{{ icon('chart') }}<p>Bu bo'limda natija yo'q.</p></div>{% endif %}
+</section>
+{% endblock %}

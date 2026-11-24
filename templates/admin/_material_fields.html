@@ -1,0 +1,13 @@
+<label>Sarlavha <input name="title" maxlength="150" value="{{ m.title if m else '' }}" required></label>
+<label>Matn <textarea name="body" rows="10" maxlength="20000">{{ m.body if m else '' }}</textarea><span class="help">Abzaslar bo'sh qator bilan ajratiladi</span></label>
+<label>Rasm (JPG, PNG, WEBP, 5 MB gacha) <input type="file" name="image" accept="image/jpeg,image/png,image/webp"></label>
+{% if m and m.image %}
+<img class="material-img" src="/admin/material/{{ m.id }}/image" alt="">
+<label class="check"><input type="checkbox" name="image_delete"> Rasmni o'chirish</label>
+{% endif %}
+<div class="form-grid">
+  <label>Qo'shimcha havolalar
+    <textarea name="url" rows="4" maxlength="3000" placeholder="Video dars | https://youtube.com/...&#10;https://uz.wikipedia.org/...">{{ m.url if m else '' }}</textarea>
+    <span class="help">Har bir qatorda bitta havola: «https://...» yoki «Nomi | https://...»</span></label>
+  <label>Tartib raqami <input name="position" type="number" value="{{ m.position if m else (materials|length if materials is defined else 0) + 1 }}"></label>
+</div>

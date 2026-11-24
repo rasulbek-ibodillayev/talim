@@ -1,0 +1,23 @@
+{% set k0 = e.kind if e else sel_kind %}
+{% set d0 = defaults[k0] %}
+<div class="form-grid" data-exam-defaults='{{ defaults|tojson }}'>
+  <label>Turi
+    <select name="kind" required data-exam-kind>
+      {% for k, (name, _d) in kinds.items() %}
+        <option value="{{ k }}" {{ 'selected' if k == k0 }}>{{ name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Nomi <input name="title" maxlength="150" value="{{ e.title if e else '' }}" placeholder="Masalan: DTM namunaviy test №2" required></label>
+  <label class="full">Tavsif <textarea name="description" rows="3" maxlength="1000">{{ e.description if e else '' }}</textarea></label>
+</div>
+<div class="form-grid three">
+  <label>Ajratilgan vaqt (daqiqa) <input name="time_limit" type="number" min="1" max="600" value="{{ e.time_limit if e else d0.time }}" required data-def="time"></label>
+  <label><span data-label-a>{{ 'Majburiy blok: 1 savol balli' if k0 == 'dtm' else '1 savol balli' }}</span>
+    <input name="points_a" inputmode="decimal" value="{{ (e.points_a if e else d0.pa)|num }}" required data-def="pa"></label>
+  <label data-dtm-only {{ 'hidden' if k0 != 'dtm' }}>Mutaxassislik blok: 1 savol balli
+    <input name="points_b" inputmode="decimal" value="{{ (e.points_b if e and e.points_b else defaults.dtm.pb)|num }}" data-def="pb"></label>
+  <label>Tartib raqami <input name="position" type="number" value="{{ e.position if e else 0 }}"></label>
+  <label class="check"><input type="checkbox" name="shuffle" {{ 'checked' if e and e.shuffle }}> Savollar tartibini aralashtirish</label>
+  <label class="check"><input type="checkbox" name="published" {{ 'checked' if not e or e.published }}> O'quvchilarga ko'rinsin</label>
+</div>

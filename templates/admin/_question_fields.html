@@ -1,0 +1,32 @@
+{% set qq = q if q is defined else none %}
+<div class="form-grid">
+  {% if exam_mode is defined and exam_mode %}
+  <label>Mavzu (xatolar tahlili uchun)
+    <select name="topic_id">
+      <option value="">— Belgilanmagan —</option>
+      {% for t in topics %}<option value="{{ t.id }}" {{ 'selected' if qq and qq.topic_id == t.id }}>{{ t.title }}</option>{% endfor %}
+    </select>
+  </label>
+  {% if exam_kind == 'dtm' %}
+  <label>Blok
+    <select name="section">
+      <option value="a" {{ 'selected' if qq and qq.section == 'a' }}>Majburiy blok</option>
+      <option value="b" {{ 'selected' if qq and qq.section == 'b' }}>Mutaxassislik (spes) blok</option>
+    </select>
+  </label>
+  {% endif %}
+  {% endif %}
+  <label>To'g'ri javob
+    <select name="correct" required>
+      {% for n in range(1, 5) %}
+        <option value="{{ n }}" {{ 'selected' if qq and qq.correct == n }}>{{ 'ABCD'[n-1] }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="full">Savol matni <textarea name="text" rows="2" maxlength="1000" required>{{ qq.text if qq else '' }}</textarea></label>
+  <label>A varianti <input name="o1" maxlength="300" value="{{ qq.o1 if qq else '' }}" required></label>
+  <label>B varianti <input name="o2" maxlength="300" value="{{ qq.o2 if qq else '' }}" required></label>
+  <label>C varianti <input name="o3" maxlength="300" value="{{ qq.o3 if qq else '' }}" required></label>
+  <label>D varianti <input name="o4" maxlength="300" value="{{ qq.o4 if qq else '' }}" required></label>
+  <label class="full">Izoh <input name="explanation" maxlength="1000" value="{{ qq.explanation if qq else '' }}"><span class="help">Test yakunida o'quvchiga ko'rsatiladi</span></label>
+</div>

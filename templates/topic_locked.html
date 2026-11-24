@@ -1,0 +1,13 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import icon %}
+{% block title %}{{ topic.title }}{% endblock %}
+{% block page_class %}narrow{% endblock %}
+{% block content %}
+<nav class="crumbs"><a href="/dashboard">Bosh sahifa</a> {{ icon('right') }} <span>{{ topic.title }}</span></nav>
+<section class="card empty">
+  {{ icon('lock', 'xl') }}
+  <h1>{{ info.n }}-dars {{ 'tayyorlanmoqda' if info.state == 'soon' else 'hali yopiq' }}</h1>
+  <p class="text-2">{% if info.state == 'soon' %}Ustoz «{{ topic.title }}» mavzusiga hali material va test kiritmagan.{% else %}«{{ topic.title }}» darsi oldingi dars testidan muvaffaqiyatli o'tganingizdan keyin ochiladi.{% endif %}</p>
+  {% if current %}<a class="btn" href="/topic/{{ current.id }}">{{ icon('play') }} Joriy dars: {{ current.title }}</a>{% endif %}
+</section>
+{% endblock %}

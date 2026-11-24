@@ -1,0 +1,24 @@
+{# Admin paneli #}
+{% extends "layout.html" %}
+{% from "_macros.html" import avatar, nav_link %}
+{% block site_name %}Tarix Ustoz{% endblock %}
+{% block body_class %}admin-area{% endblock %}
+{% block brand %}<a class="brand" href="/admin"><span class="brand-mark">A</span><span class="brand-name">Tarix Ustoz<small>Admin panel</small></span></a>{% endblock %}
+{% block sidebar %}
+    {% set p = request.path %}
+    <nav class="nav-group">
+      <div class="nav-label">O'quv kontenti</div>
+      {{ nav_link('/admin', 'book', 'Mavzular', p == '/admin' or p.startswith('/admin/topic') or p.startswith('/admin/material') or p.startswith('/admin/question')) }}
+      {{ nav_link('/admin/exams', 'list', 'Testlar', p.startswith('/admin/exam')) }}
+    </nav>
+    <nav class="nav-group">
+      <div class="nav-label">Boshqaruv</div>
+      {{ nav_link('/admin/settings', 'settings', 'Test sozlamalari', p.startswith('/admin/settings')) }}
+      {{ nav_link('/admin/users', 'users', 'Foydalanuvchilar', p.startswith('/admin/user')) }}
+    </nav>
+    <nav class="nav-group">
+      <div class="nav-label">Hisob</div>
+      {{ nav_link('/admin/profile', 'user', 'Profil', p.startswith('/admin/profile')) }}
+    </nav>
+{% endblock %}
+{% block me %}<a class="me" href="/admin/profile">{{ avatar(user) }}<span><span class="me-name">{{ user.first_name }} {{ user.last_name }}</span><br><span class="me-sub">Administrator</span></span></a>{% endblock %}

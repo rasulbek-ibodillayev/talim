@@ -1,0 +1,129 @@
+{% extends "admin/base.html" %}
+{% from "_macros.html" import icon %}
+{% block title %}{{ topic.title }} · Admin{% endblock %}
+{% block content %}
+<nav class="crumbs"><a href="/admin">Mavzular</a> {{ icon('right') }} <span>{{ topic.title }}</span></nav>
+<div class="page-head">
+  <div><h1>{{ topic.title }}</h1><p>{{ materials|length }} material · {{ files|length }} fayl · {{ questions|length }} savol</p></div>
+</div>
+
+<details class="card">
+  <summary>Mavzu nomi, tartibi va holati</summary>
+  <form method="post" action="/admin/topic/{{ topic.id }}/save">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    {% include "admin/_topic_fields.html" %}
+    <div class="actions between">
+      <button class="btn" type="submit">Saqlash</button>
+      <button class="ghost danger" type="submit" form="del-topic">{{ icon('trash') }} Mavzuni o'chirish</button>
+    </div>
+  </form>
+  <form method="post" id="del-topic" action="/admin/topic/{{ topic.id }}/delete" data-confirm="Mavzu, uning materiallari, fayllari va savollari butunlay o'chiriladi. Davom etasizmi?">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  </form>
+</details>
+
+<section class="card" id="materials">
+  <div class="card-head"><h2>Matn, rasm va havolalar ({{ materials|length }})</h2></div>
+  {% if materials %}
+  <ul class="list mb">
+    {% for m in materials %}
+      {% set nl = (m.url | links)|length %}
+      <li><span class="badge">{{ m.position }}</span><div class="grow title">{{ m.title }}</div>{% if m.image %}<span class="badge ok">Rasm</span>{% endif %}{% if nl %}<span class="badge info">{{ icon('link') }} {{ nl }}</span>{% endif %}<a class="ghost sm" href="/admin/material/{{ m.id }}">{{ icon('edit') }} Tahrirlash</a></li>
+    {% endfor %}
+  </ul>
+  {% else %}<p class="muted">Material yo'q.</p>{% endif %}
+  <details>
+    <summary class="ghost sm" style="display: inline-flex">{{ icon('plus') }} Material qo'shish</summary>
+    <form method="post" action="/admin/topic/{{ topic.id }}/material" class="mt" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      {% set m = none %}
+      {% include "admin/_material_fields.html" %}
+      <button class="btn" type="submit">Qo'shish</button>
+    </form>
+  </details>
+</section>
+
+<section class="card" id="files">
+  <div class="card-head"><h2>Fayllar: Word, PDF ({{ files|length }})</h2></div>
+  {% if files %}
+  <ul class="list mb">
+    {% for f in files %}
+      <li><span class="stat-icon">{{ icon('file') }}</span>
+        <div class="grow"><div class="title">{{ f.name }}</div><div class="muted small">{{ f.size|filesize }} · {{ f.created_at|dt }}</div></div>
+        <a class="ghost sm" href="/admin/file/{{ f.id }}">{{ icon('download') }}</a>
+        <form method="post" action="/admin/file/{{ f.id }}/delete" data-confirm="Fayl o'chirilsinmi?" class="inline-form">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <button class="ghost sm danger" type="submit">{{ icon('trash') }}</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  <form method="post" action="/admin/topic/{{ topic.id }}/file" enctype="multipart/form-data" class="upload-row">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label>Fayl (.pdf, .doc, .docx, 20 MB gacha) <input type="file" name="file" accept=".pdf,.doc,.docx" required></label>
+    <label>Nomi (ixtiyoriy) <input name="title" maxlength="150" placeholder="Masalan: Darslik 7-bob"></label>
+    <button class="btn" type="submit">{{ icon('upload') }} Yuklash</button>
+  </form>
+</section>
+
+<section class="card" id="questions">
+  <div class="card-head"><h2>Test savollari ({{ questions|length }})</h2>
+    <a class="ghost sm" href="/admin/template/topic.xlsx">{{ icon('download') }} Excel namunasi</a></div>
+  <form method="post" action="/admin/topic/{{ topic.id }}/test" class="upload-row mb">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label>Test vaqti (daqiqa) <input name="test_time" type="number" min="1" max="600" required value="{{ topic.test_time if topic.test_time else st.topic_time }}"></label>
+    <label>1 savol balli <input name="test_points" inputmode="decimal" required value="{{ (topic.test_points if topic.test_points else st.topic_points)|num }}"></label>
+    <button class="btn" type="submit">Saqlash</button>
+  </form>
+  <p class="muted small">Savollar mavzu testida ({{ st.topic_count }} tadan) va diagnostikada ishlatiladi; soni <a href="/admin/settings">Test sozlamalari</a>da belgilanadi. Bitta savol bitta o'quvchiga faqat bir marta tushadi, shuning uchun qayta topshirishlarga yetarli savol kiriting.</p>
+  <div class="table-wrap mb"><table class="admin-q">
+    <thead><tr><th class="num">№</th><th>Savol</th><th>Javob</th><th></th></tr></thead>
+    <tbody>
+    {% for q in questions %}
+    <tr>
+      <td class="num muted">{{ loop.index }}</td>
+      <td>{{ q.text }}</td>
+      <td class="ans">{{ 'ABCD'[q.correct - 1] }}</td>
+      <td class="num"><a class="ghost sm" href="/admin/question/{{ q.id }}">{{ icon('edit') }}</a></td>
+    </tr>
+    {% else %}<tr><td colspan="4" class="empty">Savol yo'q</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+
+  <div class="grid three">
+    <details class="card mb-0">
+      <summary>Bittalab qo'shish</summary>
+      <form method="post" action="/admin/topic/{{ topic.id }}/question">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        {% include "admin/_question_fields.html" %}
+        <button class="btn" type="submit">Qo'shish</button>
+      </form>
+    </details>
+    <details class="card mb-0" open>
+      <summary>Excel fayldan yuklash</summary>
+      <form method="post" action="/admin/topic/{{ topic.id }}/import-xlsx" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <p class="small text-2">Avval <a href="/admin/template/topic.xlsx">namunani yuklab oling</a>, to'ldiring va shu yerga yuklang.</p>
+        <label>Excel fayl (.xlsx) <input type="file" name="file" accept=".xlsx" required></label>
+        <button class="btn" type="submit">{{ icon('upload') }} Yuklash</button>
+      </form>
+    </details>
+    <details class="card mb-0">
+      <summary>Matndan import</summary>
+      <form method="post" action="/admin/topic/{{ topic.id }}/import">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <pre class="import-help">Savol matni?
+A) variant
+B) variant
+C) variant
+D) variant
+Javob: A
+Izoh: ...</pre>
+        <label>Savollar <textarea name="text" rows="8"></textarea></label>
+        <button class="btn" type="submit">{{ icon('upload') }} Import</button>
+      </form>
+    </details>
+  </div>
+</section>
+{% endblock %}

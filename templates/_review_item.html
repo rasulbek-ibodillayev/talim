@@ -1,0 +1,24 @@
+{% from "_macros.html" import icon %}
+<div class="review {{ q.status }}" data-status="{{ q.status }}">
+  <div class="review-head">
+    <p class="q">{{ q.n ~ '. ' if q.n is defined and not q.source is defined }}{{ q.text }}</p>
+    {% if q.status == 'right' %}<span class="badge ok">{{ icon('check') }} To'g'ri</span>
+    {% elif q.status == 'wrong' %}<span class="badge err">{{ icon('x') }} Xato</span>
+    {% elif q.status == 'idk' %}<span class="badge warn">{{ icon('help') }} Bilmayman</span>
+    {% else %}<span class="badge warn">{{ icon('minus') }} Javobsiz</span>{% endif %}
+  </div>
+  <p class="muted small">
+    {% if q.topic %}Mavzu: <b>{{ q.topic }}</b>{% else %}Mavzu belgilanmagan{% endif %}
+    {% if q.section %}<span class="dot-sep"></span>{{ q.section }}{% endif %}
+    {% if q.source is defined %}<span class="dot-sep"></span><a href="/result/{{ q.aid }}">{{ q.source }}</a><span class="dot-sep"></span>{{ q.date | dt }}{% endif %}
+  </p>
+  <ul class="opts">
+    {% for o in q.options %}
+      <li class="{{ 'correct' if loop.index0 == q.correct }} {{ 'chosen' if loop.index0 == q.chosen }}">
+        <span class="letter">{{ 'ABCD'[loop.index0] }}</span><span>{{ o }}</span>
+        {% if loop.index0 == q.correct %}<em>To'g'ri javob</em>{% elif loop.index0 == q.chosen %}<em>Sizning javobingiz</em>{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+  {% if q.explanation %}<div class="explain">{{ icon('bulb') }}<span>{{ q.explanation }}</span></div>{% endif %}
+</div>

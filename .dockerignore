@@ -1,0 +1,11 @@
+.env
+.git
+.vscode
+data/
+tests/
+demo.py
+start.bat
+venv/
+.venv/
+__pycache__/
+*.pyc

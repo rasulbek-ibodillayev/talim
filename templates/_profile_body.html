@@ -1,0 +1,74 @@
+{% from "_macros.html" import avatar, icon %}
+<div class="page-head"><div><h1>Mening profilim</h1><p>Shaxsiy ma'lumotlar va xavfsizlik sozlamalari.</p></div></div>
+
+<section class="card">
+  <div class="avatar-row">
+    <div id="avatar-holder">{{ avatar(user, 'xl') }}</div>
+    <div>
+      <h2 class="mb-0">{{ user.first_name }} {{ user.last_name }}</h2>
+      <p class="muted small">{{ user.phone }} · {{ user.region }} · {{ user.created_at | dt }} dan beri</p>
+      <input type="file" id="avatar-input" accept="image/jpeg,image/png,image/webp" hidden>
+      <div class="actions">
+        <button class="ghost sm" type="button" id="avatar-pick">{{ icon('upload') }} Rasm yuklash</button>
+        {% if user.avatar %}<button class="ghost sm danger" type="button" id="avatar-delete">{{ icon('trash') }} O'chirish</button>{% endif %}
+      </div>
+      <span class="help">JPG, PNG yoki WEBP, 2 MB gacha.</span>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Shaxsiy ma'lumotlar</h2>
+  <form id="profile-form" novalidate>
+    <div class="form-grid">
+      <label>Ism <input name="first_name" maxlength="50" value="{{ user.first_name }}" required></label>
+      <label>Familiya <input name="last_name" maxlength="50" value="{{ user.last_name }}" required></label>
+      <label>Hudud
+        <select name="region" required>
+          {% for r in regions %}<option value="{{ r }}" {{ 'selected' if r == user.region }}>{{ r }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Tug'ilgan yil
+        <input name="birth_year" inputmode="numeric" maxlength="4" placeholder="Masalan: 2007" value="{{ user.birth_year or '' }}">
+      </label>
+      {% if admin_area %}<input type="hidden" name="education" value="{{ user.education or '' }}">
+      {% else %}
+      <label class="full">O'qish joyi
+        <input name="education" maxlength="100" placeholder="Masalan: 12-maktab, 11-sinf" value="{{ user.education or '' }}">
+      </label>
+      {% endif %}
+      <label class="full">O'zim haqimda
+        <textarea name="bio" maxlength="300" rows="3" placeholder="Qisqacha (300 belgigacha)">{{ user.bio or '' }}</textarea>
+      </label>
+      <label class="full">Telefon raqam (login) <input value="{{ user.phone }}" disabled></label>
+    </div>
+    <button class="btn" type="submit">Saqlash</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Parolni o'zgartirish</h2>
+  <form id="password-form" novalidate>
+    <div class="form-grid">
+      <label class="full">Joriy parol <input name="old" type="password" autocomplete="current-password" required></label>
+      <label>Yangi parol <input name="new" type="password" autocomplete="new-password" minlength="8" required><span class="help">Kamida 8 ta belgi</span></label>
+      <label>Yangi parolni takrorlang <input name="new2" type="password" autocomplete="new-password" minlength="8" required></label>
+    </div>
+    <button class="btn" type="submit">{{ icon('lock') }} Parolni yangilash</button>
+  </form>
+</section>
+
+{% if not admin_area %}
+<section class="card" id="secret">
+  <h2>Mahfiy so'z</h2>
+  {% if not user.secret_hash %}<div class="flash warn">{{ icon('alert') }}<span>Mahfiy so'z qo'yilmagan. Usiz unutilgan parolni tiklab bo'lmaydi.</span></div>{% endif %}
+  <p class="muted small">Parolni unutsangiz, telefon raqam va mahfiy so'z orqali yangi parol qo'yasiz. Uni hech kimga aytmang.</p>
+  <form id="secret-form" novalidate>
+    <div class="form-grid">
+      <label>Joriy parol <input name="password" type="password" autocomplete="current-password" required></label>
+      <label>Yangi mahfiy so'z <input name="secret" type="text" maxlength="64" autocomplete="off" required></label>
+    </div>
+    <button class="btn" type="submit">{{ icon('lock') }} {{ "Mahfiy so'zni almashtirish" if user.secret_hash else "Mahfiy so'zni saqlash" }}</button>
+  </form>
+</section>
+{% endif %}

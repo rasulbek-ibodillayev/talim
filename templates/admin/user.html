@@ -1,0 +1,62 @@
+{% extends "admin/base.html" %}
+{% from "_macros.html" import icon, avatar, badge, ring, attempts_table %}
+{% block title %}{{ u.first_name }} {{ u.last_name }} · Admin{% endblock %}
+{% block content %}
+<nav class="crumbs"><a href="/admin/users">Foydalanuvchilar</a> {{ icon('right') }} <span>{{ u.first_name }} {{ u.last_name }}</span></nav>
+
+<section class="card">
+  <div class="avatar-row">
+    {{ avatar(u, 'xl') }}
+    <div class="grow">
+      <h1 class="mb-0">{{ u.first_name }} {{ u.last_name }}</h1>
+      <p class="muted">{{ u.phone }} · {{ u.region }}</p>
+      <div class="kv-grid small">
+        <div><span class="muted">Ro'yxatdan o'tgan</span><b>{{ u.created_at | dt }}</b></div>
+        <div><span class="muted">Oxirgi faollik</span><b>{{ u.last_seen | dt }}</b></div>
+        <div><span class="muted">Tug'ilgan yil</span><b>{{ u.birth_year or '—' }}</b></div>
+        <div><span class="muted">O'qish joyi</span><b>{{ u.education or '—' }}</b></div>
+        <div><span class="muted">Diagnostika</span><b>{{ "O'tgan" if pd.has_diag else ('Rad etgan' if pd.declined else "Hali qaror qilmagan") }}</b></div>
+      </div>
+      {% if u.bio %}<p class="text-2 mt mb-0">{{ u.bio }}</p>{% endif %}
+    </div>
+    {{ ring(pd.pct, "reja") }}
+  </div>
+</section>
+
+<div class="grid four section">
+  <div class="card stat"><div class="stat-icon">{{ icon('book', 'lg') }}</div><div><div class="stat-value">{{ pd.done }}/{{ pd.total }}</div><div class="stat-label">Dars reja</div></div></div>
+  <div class="card stat"><div class="stat-icon ok">{{ icon('check', 'lg') }}</div><div><div class="stat-value">{{ stats.n }}</div><div class="stat-label">Topshirilgan test</div></div></div>
+  <div class="card stat"><div class="stat-icon accent">{{ icon('chart', 'lg') }}</div><div><div class="stat-value">{{ stats.avg }}%</div><div class="stat-label">O'rtacha · eng yaxshi {{ stats.best }}%</div></div></div>
+  <div class="card stat"><div class="stat-icon err">{{ icon('flag', 'lg') }}</div><div><div class="stat-value">{{ n_mistakes }}</div><div class="stat-label">Xato savollar</div></div></div>
+</div>
+
+<div class="grid two section">
+  <section class="card mb-0">
+    <h2>Mavzular bo'yicha holat</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Mavzu</th><th>Daraja</th><th class="num">Test</th><th>Holat</th></tr></thead>
+      <tbody>
+      {% for t in pd.all %}
+        <tr>
+          <td class="small">{{ t.title }}{% if t.first_failed %} <span class="badge warn" title="Birinchi urinishda o'tolmagan">xato</span>{% endif %}</td>
+          <td>{% if t.level %}{{ badge(levels[t.level][1], levels[t.level][0] ~ ' ' ~ t.diag_percent ~ '%') }}{% else %}<span class="muted">—</span>{% endif %}</td>
+          <td class="num">{{ (t.best_percent ~ '%') if t.best_percent is not none else '—' }}</td>
+          <td>{{ badge(states[t.state][1], states[t.state][0]) }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+  <section class="card mb-0">
+    <h2>Xatolar mavzular bo'yicha</h2>
+    {% if mistakes_by_topic %}
+      <ul class="list">{% for title, n in mistakes_by_topic %}<li><div class="grow small">{{ title }}</div><span class="badge err">{{ n }}</span></li>{% endfor %}</ul>
+    {% else %}<p class="muted">Ochiq xato yo'q.</p>{% endif %}
+  </section>
+</div>
+
+<section class="card flush">
+  <div class="card-pad card-head mb-0"><h2>Test natijalari ({{ attempts|length }})</h2></div>
+  {% if attempts %}{{ attempts_table(attempts, links=false) }}{% else %}<div class="empty"><p>Hali test topshirilmagan.</p></div>{% endif %}
+</section>
+{% endblock %}

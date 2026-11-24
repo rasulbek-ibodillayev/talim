@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <title>Tarix Ustoz · Tarix fanidan shaxsiy tayyorgarlik</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/static/style.css?v=7">
+</head>
+<body>
+{% from "_macros.html" import icon %}
+<div class="auth">
+  <aside class="auth-side">
+    <a class="brand" href="/"><span class="brand-mark">T</span><span class="brand-name">Tarix Ustoz<small>Tarix fani</small></span></a>
+    <div class="auth-pitch">
+      <h1>Tarixni tizimli o'rganing, imtihonga ishonch bilan kiring</h1>
+      <p>Diagnostika bilim darajangizni aniqlaydi, platforma esa sizga mos dars reja tuzadi.</p>
+      <div class="feature"><span class="fi">{{ icon('target') }}</span><div><b>Diagnostik test</b><span>Qaysi mavzularda bilim kamligini aniqlaydi</span></div></div>
+      <div class="feature"><span class="fi">{{ icon('plan') }}</span><div><b>Shaxsiy dars reja</b><span>Zaif mavzulardan boshlanadigan o'quv yo'li</span></div></div>
+      <div class="feature"><span class="fi">{{ icon('dtm') }}</span><div><b>DTM, olimpiada, milliy sertifikat</b><span>Imtihon formatidagi testlar va xatolar tahlili</span></div></div>
+    </div>
+  </aside>
+
+  <main class="auth-main">
+    <div class="auth-card" id="app">
+      <h2>Xush kelibsiz</h2>
+      <p class="muted">Davom etish uchun tizimga kiring yoki ro'yxatdan o'ting.</p>
+
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="login" role="tab" type="button">Kirish</button>
+        <button class="tab" data-tab="register" role="tab" type="button">Ro'yxatdan o'tish</button>
+      </div>
+
+      <div id="msg" class="msg" role="alert" hidden></div>
+
+      <section id="tab-login">
+        <form id="login-form" autocomplete="on" novalidate>
+          <label>Telefon raqam
+            <div class="phone"><span>+998</span><input name="phone" type="tel" inputmode="numeric" placeholder="90 123 45 67" autocomplete="username" required></div>
+          </label>
+          <label>Parol <input name="password" type="password" autocomplete="current-password" required></label>
+          <button class="btn block lg" type="submit">Kirish</button>
+        </form>
+        <p class="mt mb-0" style="text-align: center"><button type="button" class="linkbtn" data-view="recover">Parolni unutdingizmi?</button></p>
+      </section>
+
+      <section id="tab-register" hidden>
+        <form id="register-form" novalidate>
+          <label>Telefon raqam
+            <div class="phone"><span>+998</span><input name="phone" type="tel" inputmode="numeric" placeholder="90 123 45 67" autocomplete="username" required></div>
+          </label>
+          <div class="form-grid">
+            <label>Ism <input name="first_name" maxlength="50" autocomplete="given-name" required></label>
+            <label>Familiya <input name="last_name" maxlength="50" autocomplete="family-name" required></label>
+          </div>
+          <label>Hudud
+            <select name="region" required>
+              <option value="">Tanlang...</option>
+              {% for r in regions %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
+            </select>
+          </label>
+          <label>Yangi parol <input name="password" type="password" minlength="8" autocomplete="new-password" required><span class="help">Kamida 8 ta belgi</span></label>
+          <label>Parolni tasdiqlang <input name="password2" type="password" minlength="8" autocomplete="new-password" required></label>
+          <label>Mahfiy so'z <input name="secret" type="text" minlength="{{ secret_min }}" maxlength="64" autocomplete="off" required>
+            <span class="help">Kamida {{ secret_min }} ta belgi. Parolni unutsangiz, shu so'z orqali tiklaysiz: eslab qoling va hech kimga aytmang.</span></label>
+          <button class="btn block lg" type="submit">Ro'yxatdan o'tish</button>
+        </form>
+      </section>
+
+      <section id="tab-recover" hidden>
+        <h3>Parolni tiklash</h3>
+        <form id="recover-form" novalidate>
+          <p class="muted small">Telefon raqamingiz va ro'yxatdan o'tishda qo'ygan mahfiy so'zingizni yozing.</p>
+          <label>Telefon raqam
+            <div class="phone"><span>+998</span><input name="phone" type="tel" inputmode="numeric" placeholder="90 123 45 67" autocomplete="username" required></div>
+          </label>
+          <label>Mahfiy so'z <input name="secret" type="text" maxlength="64" autocomplete="off" required></label>
+          <button class="btn block lg" type="submit">Tekshirish</button>
+        </form>
+        <form id="reset-form" hidden novalidate>
+          <p class="muted small">Mahfiy so'z to'g'ri. Yangi parol qo'ying.</p>
+          <label>Yangi parol <input name="password" type="password" minlength="8" autocomplete="new-password" required><span class="help">Kamida 8 ta belgi</span></label>
+          <label>Parolni tasdiqlang <input name="password2" type="password" minlength="8" autocomplete="new-password" required></label>
+          <button class="btn block lg" type="submit">Parolni yangilash</button>
+        </form>
+        <p class="mt mb-0" style="text-align: center"><button type="button" class="linkbtn" data-view="login">Kirish sahifasiga qaytish</button></p>
+      </section>
+    </div>
+  </main>
+</div>
+<script src="/static/app.js?v=4"></script>
+</body>
+</html>

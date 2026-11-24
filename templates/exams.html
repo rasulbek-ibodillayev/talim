@@ -1,0 +1,44 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import icon %}
+{% block title %}{{ kinds[kind][0] }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">Testlar</span>
+    <h1>{{ kinds[kind][0] }}</h1>
+    <p>{{ kinds[kind][1] }}. Istalgan vaqtda ishlashingiz mumkin, natija «Natijalarim» bo'limiga yoziladi.</p>
+  </div>
+</div>
+
+<div class="tabs mb">
+  {% for k, (name, _d) in kinds.items() %}
+    <a class="tab {{ 'active' if k == kind }}" href="/exams/{{ k }}">{{ icon(k) }} {{ name }} <span class="count">{{ counts.get(k, 0) }}</span></a>
+  {% endfor %}
+</div>
+
+{% if exams %}
+<div class="grid three">
+  {% for e in exams %}
+  <article class="card exam-card">
+    <div class="actions between">
+      <span class="stat-icon {{ 'accent' if kind == 'olympiad' else ('ok' if kind == 'certificate' else '') }}">{{ icon(kind, 'lg') }}</span>
+      {% if e.pending %}<span class="badge info">{{ icon('clock') }} Yakunlanmagan</span>
+      {% elif e.best is not none %}<span class="badge {{ 'ok' if e.best >= 80 else ('info' if e.best >= 60 else 'warn') }}">Eng yaxshi: {{ e.best }}%</span>
+      {% else %}<span class="badge new">Ishlanmagan</span>{% endif %}
+    </div>
+    <h3><a href="/exam/{{ e.id }}">{{ e.title }}</a></h3>
+    <p class="desc mb-0">{{ (e.description or '')|truncate(140) }}</p>
+    <div class="exam-meta">
+      <span>{{ icon('list') }} {{ e.n_q }} savol</span>
+      <span>{{ icon('star') }} {{ e.max_points|num }} ball</span>
+      <span>{{ icon('clock') }} {{ e.time_limit }} daqiqa</span>
+    </div>
+    {% if kind == 'dtm' %}<div class="muted small">{% for p in e.parts %}{{ p.name }}: {{ p.n }} × {{ p.points|num }} ball{{ '; ' if not loop.last }}{% endfor %}</div>{% endif %}
+    <a class="{{ 'ghost' if e.tries and not e.pending else 'btn' }} block" href="{{ '/quiz/' ~ e.pending if e.pending else '/exam/' ~ e.id }}">{{ 'Davom ettirish' if e.pending else ('Batafsil' if e.tries else 'Boshlash') }}</a>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card empty">{{ icon(kind, 'xl') }}<h3>Hozircha testlar yo'q</h3><p>Administrator bu bo'limga testlar qo'shgach, shu yerda paydo bo'ladi.</p></div>
+{% endif %}
+{% endblock %}

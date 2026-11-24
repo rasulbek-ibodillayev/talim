@@ -1,0 +1,60 @@
+{% extends "admin/base.html" %}
+{% from "_macros.html" import icon %}
+{% block title %}Mavzular · Admin{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Mavzular</h1><p>Mavzular shu tartibda o'quvchilarga ketma-ket o'tiladi. Mavzuni tanlab, unga matn, rasm, fayl, havola va test savollarini kiriting.</p></div>
+  <div class="actions"><a class="ghost" href="/admin/template/topic.xlsx">{{ icon('download') }} Excel namunasi</a></div>
+</div>
+
+<div class="grid four section">
+  <div class="card stat"><div class="stat-icon">{{ icon('users', 'lg') }}</div><div><div class="stat-value">{{ stats.users }}</div><div class="stat-label">O'quvchi</div></div></div>
+  <div class="card stat"><div class="stat-icon ok">{{ icon('book', 'lg') }}</div><div><div class="stat-value">{{ stats.topics }}</div><div class="stat-label">Mavzu</div></div></div>
+  <div class="card stat"><div class="stat-icon accent">{{ icon('help', 'lg') }}</div><div><div class="stat-value">{{ stats.questions }}</div><div class="stat-label">Savol (jami)</div></div></div>
+  <div class="card stat"><div class="stat-icon">{{ icon('target', 'lg') }}</div><div><div class="stat-value">{{ diag_total }}</div><div class="stat-label">Diagnostika savollari</div></div></div>
+</div>
+
+<section class="card flush">
+  <div class="card-pad card-head mb-0"><h2>Mavzular tartibi</h2><a class="muted small" href="/admin/settings">Savollar soni va foizlar: Test sozlamalari {{ icon('right') }}</a></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th class="num">Dars</th><th>Mavzu</th><th>Holat</th><th class="num">Material</th><th class="num">Fayl</th><th class="num">Savollar</th><th class="num" title="Diagnostikada beriladigan savollar">Diagnostika</th><th class="num" title="Savollar mavzu testining necha urinishiga yetadi (bitta savol o'quvchiga faqat bir marta tushadi)">Urinishga</th><th class="num">O'tganlar</th><th></th></tr></thead>
+    <tbody>
+    {% for t in topics %}
+    <tr>
+      <td class="num muted">{{ loop.index }}</td>
+      <td><a class="title" href="/admin/topic/{{ t.id }}">{{ t.title }}</a></td>
+      <td>{% if t.published %}<span class="badge ok">Faol</span>{% if not t.n_q %}<div><span class="badge warn" title="{{ 'Materiali ham, testi ham yo‘q: o‘quvchida «Tayyorlanmoqda» bo‘lib turadi' if not t.n_mat else 'Test savollari yo‘q: materiallar o‘qilsa, dars o‘tilgan hisoblanadi' }}">{{ "Bo'sh" if not t.n_mat else "Testsiz" }}</span></div>{% endif %}{% else %}<span class="badge new">Yashirin</span>{% endif %}</td>
+      <td class="num">{{ t.n_mat }}</td>
+      <td class="num">{{ t.n_files }}</td>
+      <td class="num">{{ t.n_q }}</td>
+      <td class="num">{{ t.n_diag }}</td>
+      <td class="num">{% if t.tries < 2 %}<span class="badge warn" title="Har bir urinishga {{ st.topic_count }} ta yangi savol kerak">{{ t.tries }} marta</span>{% else %}{{ t.tries }} marta{% endif %}{% if t.waiting %}<div><span class="badge err" title="{{ t.waiting }} o'quvchi yangi savol kutmoqda">{{ t.waiting }} kutmoqda</span></div>{% endif %}</td>
+      <td class="num">{{ t.n_passed }}</td>
+      <td class="num nowrap">
+        <form method="post" action="/admin/topic/{{ t.id }}/move" class="inline-form">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <button class="ghost sm" name="dir" value="up" title="Yuqoriga" {{ 'disabled' if loop.first }}>{{ icon('up') }}</button>
+          <button class="ghost sm" name="dir" value="down" title="Pastga" {{ 'disabled' if loop.last }}>{{ icon('down') }}</button>
+        </form>
+        <a class="ghost sm" href="/admin/topic/{{ t.id }}" title="Tahrirlash">{{ icon('edit') }}</a>
+        <form method="post" action="/admin/topic/{{ t.id }}/delete" class="inline-form" data-confirm="Mavzu, uning materiallari, fayllari va savollari butunlay o'chiriladi. Davom etasizmi?">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <button class="ghost sm danger" type="submit" title="O'chirish">{{ icon('trash') }}</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}<tr><td colspan="9" class="empty">Mavzu yo'q. Quyida birinchi mavzuni qo'shing.</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+</section>
+
+<details class="card" {{ 'open' if not topics }}>
+  <summary>Yangi mavzu yaratish</summary>
+  <form method="post" action="/admin/topic/new">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    {% set topic = none %}
+    {% include "admin/_topic_fields.html" %}
+    <button class="btn" type="submit">{{ icon('plus') }} Qo'shish</button>
+  </form>
+</details>
+{% endblock %}

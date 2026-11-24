@@ -1,0 +1,117 @@
+{% set ICONS = {
+  'home': '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  'target': '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+  'plan': '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M7 13h4M7 17h7"/>',
+  'book': '<path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/>',
+  'dtm': '<path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5M22 10v5"/>',
+  'olympiad': '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
+  'certificate': '<circle cx="12" cy="9" r="6"/><path d="m8.5 14.5-1.5 7.5 5-3 5 3-1.5-7.5"/>',
+  'user': '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  'users': '<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/>',
+  'shield': '<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/>',
+  'settings': '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  'logout': '<path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/>',
+  'clock': '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  'check': '<path d="m5 12 5 5 9-10"/>',
+  'x': '<path d="M6 6l12 12M18 6 6 18"/>',
+  'minus': '<path d="M5 12h14"/>',
+  'left': '<path d="M19 12H5m6-6-6 6 6 6"/>',
+  'right': '<path d="M5 12h14m-6-6 6 6-6 6"/>',
+  'up': '<path d="m6 15 6-6 6 6"/>',
+  'down': '<path d="m6 9 6 6 6-6"/>',
+  'menu': '<path d="M4 6h16M4 12h16M4 18h16"/>',
+  'plus': '<path d="M12 5v14M5 12h14"/>',
+  'edit': '<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+  'trash': '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+  'alert': '<circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/>',
+  'bulb': '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/>',
+  'chart': '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  'list': '<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>',
+  'external': '<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+  'link': '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  'file': '<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
+  'download': '<path d="M12 4v12m-5-5 5 5 5-5M4 20h16"/>',
+  'flag': '<path d="M5 21V4h11l-2 4 2 4H5"/>',
+  'play': '<path d="M7 4v16l13-8z"/>',
+  'pause': '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>',
+  'refresh': '<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/>',
+  'help': '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.7M12 17h.01"/>',
+  'star': '<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/>',
+  'upload': '<path d="M12 16V4m-5 5 5-5 5 5M4 20h16"/>',
+  'send': '<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',
+  'lock': '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  'search': '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
+  'calendar': '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>'
+} %}
+
+{% macro icon(name, cls='') -%}
+<svg class="ico {{ cls }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{{ ICONS.get(name, '')|safe }}</svg>
+{%- endmacro %}
+
+{% macro nav_link(href, ico, label, active) -%}
+<a class="nav-link {{ 'active' if active }}" href="{{ href }}" {% if active %}aria-current="page"{% endif %}>{{ icon(ico) }}<span>{{ label }}</span></a>
+{%- endmacro %}
+
+{% macro avatar(u, size='') -%}
+{%- if u.avatar -%}
+<img class="avatar {{ size }}" src="/avatar/{{ u.avatar }}" alt="">
+{%- else -%}
+<span class="avatar {{ size }}">{{ ((u.first_name or '')[:1] ~ (u.last_name or '')[:1])|upper }}</span>
+{%- endif -%}
+{%- endmacro %}
+
+{% macro bar(p, cls='') -%}
+<div class="bar {{ cls }}"><i style="width: {{ p }}%"></i></div>
+{%- endmacro %}
+
+{% macro ring(p, label='', cls='') -%}
+<div class="ring {{ cls }}" style="--p: {{ p }}" role="img" aria-label="{{ p }}%"><span>{{ p }}%{% if label %}<small>{{ label }}</small>{% endif %}</span></div>
+{%- endmacro %}
+
+{% macro badge(status, label) -%}
+<span class="badge {{ status }}">{{ label }}</span>
+{%- endmacro %}
+
+{% macro pct_badge(p) -%}
+<span class="badge {{ 'ok' if p >= 80 else ('info' if p >= 60 else ('warn' if p >= 40 else 'err')) }}">{{ p }}%</span>
+{%- endmacro %}
+
+{% macro attempt_name(a) -%}
+{%- if a.kind == 'diagnostic' -%}Diagnostik test
+{%- elif a.kind == 'exam' -%}{{ a.exam_title or "O'chirilgan test" }}
+{%- else -%}{{ a.topic_title or "O'chirilgan mavzu" }}{%- endif -%}
+{%- endmacro %}
+
+{% macro attempt_kind(a) -%}
+{%- if a.kind == 'diagnostic' -%}<span class="badge brand">Diagnostika</span>
+{%- elif a.kind == 'exam' -%}<span class="badge accent">{{ {'dtm': 'DTM', 'olympiad': 'Olimpiada', 'certificate': 'Milliy sertifikat'}.get(a.exam_kind, 'Test') }}</span>
+{%- else -%}<span class="badge">Mavzu testi</span>{%- endif -%}
+{%- endmacro %}
+
+{% macro points_of(a) -%}
+{%- if a.points is not none -%}{{ a.points|num }} / {{ a.max_points|num }}{%- else -%}{{ a.score }} / {{ a.total }}{%- endif -%}
+{%- endmacro %}
+
+{% macro attempts_table(rows, show_kind=true, links=true) -%}
+<div class="table-wrap"><table>
+  <thead><tr>{% if show_kind %}<th>Test</th>{% else %}<th>Sana</th>{% endif %}<th class="num">Natija</th><th class="num">To'g'ri</th><th class="num">Ball</th>{% if show_kind %}<th>Sana</th>{% endif %}{% if links %}<th></th>{% endif %}</tr></thead>
+  <tbody>
+  {% for a in rows %}
+    {% set p = a.score | pct(a.total) %}
+    <tr {% if links %}class="row-link" data-href="/result/{{ a.id }}"{% endif %}>
+      {% if show_kind %}<td><div class="title">{{ attempt_name(a) }}</div><div>{{ attempt_kind(a) }}</div></td>
+      {% else %}<td class="nowrap">{{ a.finished_at | dt }}</td>{% endif %}
+      <td class="num">{{ pct_badge(p) }}</td>
+      <td class="num">{{ a.score }}/{{ a.total }}</td>
+      <td class="num nowrap">{{ points_of(a) }}</td>
+      {% if show_kind %}<td class="nowrap muted">{{ a.finished_at | dt }}</td>{% endif %}
+      {% if links %}<td class="num"><a href="/result/{{ a.id }}" class="nowrap">Tahlil {{ icon('right') }}</a></td>{% endif %}
+    </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{%- endmacro %}
+
+{% macro mmss(sec) -%}
+{%- if sec is none -%}Cheklanmagan{%- else -%}{{ sec // 60 }}:{{ '%02d' % (sec % 60) }}{%- endif -%}
+{%- endmacro %}

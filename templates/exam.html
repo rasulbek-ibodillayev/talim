@@ -1,0 +1,65 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import icon, attempts_table %}
+{% block title %}{{ exam.title }}{% endblock %}
+{% block content %}
+<nav class="crumbs"><a href="/exams/{{ exam.kind }}">{{ kind_name }}</a> {{ icon('right') }} <span>{{ exam.title }}</span></nav>
+<div class="page-head">
+  <div>
+    <span class="eyebrow">{{ kind_name }}</span>
+    <h1>{{ exam.title }}</h1>
+  </div>
+</div>
+
+<div class="grid side">
+  <section class="card">
+    {% if exam.description %}<div class="text-2">{% for p in exam.description | paragraphs %}<p>{{ p }}</p>{% endfor %}</div>{% endif %}
+    <div class="grid three mb">
+      <div class="stat"><div class="stat-icon">{{ icon('list', 'lg') }}</div><div><div class="stat-value">{{ exam.n_q }}</div><div class="stat-label">Savol</div></div></div>
+      <div class="stat"><div class="stat-icon accent">{{ icon('clock', 'lg') }}</div><div><div class="stat-value">{{ exam.time_limit }}</div><div class="stat-label">Daqiqa</div></div></div>
+      <div class="stat"><div class="stat-icon ok">{{ icon('star', 'lg') }}</div><div><div class="stat-value">{{ exam.max_points|num }}</div><div class="stat-label">Maksimal ball</div></div></div>
+    </div>
+
+    <h3>Test tuzilishi</h3>
+    <div class="table-wrap mb"><table>
+      <thead><tr><th>Blok</th><th class="num">Savollar</th><th class="num">1 savol balli</th><th class="num">Jami ball</th></tr></thead>
+      <tbody>
+      {% for p in exam.parts %}
+        <tr><td>{{ p.name }}</td><td class="num">{{ p.n }}</td><td class="num">{{ p.points|num }}</td><td class="num"><b>{{ (p.n * p.points)|num }}</b></td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+
+    <h3>Qoidalar</h3>
+    <ul class="bullets">
+      <li>Har bir savolda 4 ta variant, faqat bittasi to'g'ri. Bilmagan savolni «Bilmayman» deb o'tkazishingiz mumkin (xato hisoblanadi).</li>
+      <li>Vaqt tugaganda test avtomatik yakunlanadi va belgilangan javoblar hisoblanadi.</li>
+      <li>Test sahifasidan chiqsangiz, vaqt to'xtamaydi; vaqt tugamaguncha Bosh sahifadan davom ettirishingiz mumkin.</li>
+      <li>Yakunda xatolaringiz, to'g'ri javoblar va izohlar ko'rsatiladi.</li>
+    </ul>
+    {% if exam.n_q %}
+      <div class="actions">
+        {% if pending %}
+          <a class="btn lg" href="/quiz/{{ pending.id }}">{{ icon('play') }} Davom ettirish</a>
+        {% else %}
+          <button class="btn lg" type="button" data-start-url="/api/exam/{{ exam.id }}/start">{{ icon('play') }} Testni boshlash</button>
+        {% endif %}
+      </div>
+    {% else %}
+      <p class="muted">Bu testga savollar hali kiritilmagan.</p>
+    {% endif %}
+  </section>
+
+  <aside class="card">
+    <h3>Qamrab olingan mavzular</h3>
+    {% if topics %}
+      <ul class="list">{% for t in topics %}<li><div class="grow">{{ t.title }}</div><span class="badge">{{ t.n }} savol</span></li>{% endfor %}</ul>
+    {% else %}<p class="muted small">Aralash mavzular.</p>{% endif %}
+  </aside>
+</div>
+
+<section class="card flush">
+  <div class="card-pad card-head mb-0"><h2>Mening natijalarim</h2></div>
+  {% if history %}{{ attempts_table(history, false) }}
+  {% else %}<div class="empty"><p>Siz bu testni hali ishlamagansiz.</p></div>{% endif %}
+</section>
+{% endblock %}

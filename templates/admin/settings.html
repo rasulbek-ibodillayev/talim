@@ -1,0 +1,44 @@
+{% extends "admin/base.html" %}
+{% from "_macros.html" import icon %}
+{% block title %}Test sozlamalari · Admin{% endblock %}
+{% block page_class %}narrow{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Test sozlamalari</h1><p>Har bir turdagi testda nechta savol berilishi, o'tish foizi va diagnostika tarkibi. Ball va vaqt yangi test uchun standart qiymat, har bir testda alohida o'zgartiriladi.</p></div>
+</div>
+
+<form method="post">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  {% for grp, items in groups.items() %}
+  <section class="card">
+    <h2>{{ grp }}</h2>
+    <div class="form-grid">
+      {% for it in items %}
+        <label>{{ it.label }}
+          <input name="{{ it.key }}" {% if it.float %}inputmode="decimal"{% else %}type="number" min="0"{% endif %} value="{{ it.value|num }}" required>
+          <span class="help">Standart: {{ it.default|num }}</span>
+        </label>
+      {% endfor %}
+    </div>
+    {% if grp == 'Diagnostika' and topics %}
+    <h3 class="mt">Qaysi mavzulardan nechta savol tushadi</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Mavzu</th><th class="num">Bankda</th><th class="num">Savollar soni</th><th class="num">Amalda</th></tr></thead>
+      <tbody>
+      {% for t in topics %}
+        <tr>
+          <td><label class="check mb-0"><input type="checkbox" name="diag_on_{{ t.id }}" {{ 'checked' if t.want }}> {{ t.title }}{% if not t.published %} <span class="badge new">Yashirin</span>{% endif %}</label></td>
+          <td class="num">{{ t.n_q }}</td>
+          <td class="num"><input name="diag_n_{{ t.id }}" type="number" min="0" max="50" value="{{ t.want or st.diag_per_topic }}" style="width: 90px" aria-label="{{ t.title }}: savollar soni"></td>
+          <td class="num">{% if t.want and t.real < t.want %}<span class="badge warn">{{ t.real }}</span>{% else %}{{ t.real }}{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    <p class="muted small">Jami: <b>{{ diag_total }}</b> ta savol. Savollar yetmasa, mavzu testi uchun kamida 3 ta savol qoldiriladi («Amalda» ustuni).</p>
+    {% endif %}
+  </section>
+  {% endfor %}
+  <div class="actions"><button class="btn lg" type="submit">{{ icon('check') }} Saqlash</button></div>
+</form>
+{% endblock %}

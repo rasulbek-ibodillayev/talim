@@ -1,0 +1,21 @@
+{% extends "admin/base.html" %}
+{% from "_macros.html" import icon %}
+{% block title %}Savolni tahrirlash{% endblock %}
+{% block page_class %}narrow{% endblock %}
+{% block content %}
+<nav class="crumbs"><a href="/admin/topic/{{ q.topic_id }}#questions">{{ icon('left') }} Mavzuga qaytish</a></nav>
+<div class="page-head"><h1>Savolni tahrirlash</h1></div>
+<section class="card">
+  <form method="post">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    {% include "admin/_question_fields.html" %}
+    <div class="actions between">
+      <button class="btn" type="submit">Saqlash</button>
+      <button class="ghost danger" type="submit" form="del-q">{{ icon('trash') }} O'chirish</button>
+    </div>
+  </form>
+  <form method="post" id="del-q" action="/admin/question/{{ q.id }}/delete" data-confirm="Savol o'chirilsinmi?">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  </form>
+</section>
+{% endblock %}

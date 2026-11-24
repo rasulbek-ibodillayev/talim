@@ -1,0 +1,54 @@
+{% extends "admin/base.html" %}
+{% from "_macros.html" import icon %}
+{% block title %}Testlar · Admin{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Testlar</h1><p>Olimpiada, milliy sertifikat va DTM testlari. Savollar soni Test sozlamalarida, ball va vaqt har bir testda belgilanadi.</p></div>
+  <div class="actions"><a class="ghost" href="/admin/template/exam.xlsx">{{ icon('download') }} Excel namunasi</a></div>
+</div>
+
+<div class="tabs mb">
+  {% for k, (name, _d) in kinds.items() %}
+    {% set n = exams|selectattr('kind', 'equalto', k)|list|length %}
+    <a class="tab {{ 'active' if k == sel_kind }}" href="?kind={{ k }}">{{ icon(k) }} {{ name }} <span class="count">{{ n }}</span></a>
+  {% endfor %}
+</div>
+
+{% if sel_kind == 'dtm' %}
+<div class="flash info">{{ icon('alert') }}<span>DTM testi 2 blokdan iborat: <b>majburiy</b> ({{ st.dtm_mandatory_count }} ta savol) va <b>mutaxassislik / spes</b> ({{ st.dtm_special_count }} ta savol). Savol bankida ko'proq savol bo'lsa, har safar tasodifiy tanlanadi.</span></div>
+{% else %}
+<div class="flash info">{{ icon('alert') }}<span>Har bir urinishda {{ st[sel_kind ~ '_count'] }} ta savol beriladi (Test sozlamalarida o'zgartiriladi).</span></div>
+{% endif %}
+
+{% set rows = exams|selectattr('kind', 'equalto', sel_kind)|list %}
+<section class="card flush">
+  <div class="table-wrap"><table>
+    <thead><tr><th class="num">№</th><th>Test</th><th>Holat</th><th class="num">Savollar bankida</th><th class="num">Testda</th><th class="num">Maks. ball</th><th class="num">Vaqt</th><th class="num">Ishlangan</th><th></th></tr></thead>
+    <tbody>
+    {% for e in rows %}
+    <tr>
+      <td class="num muted">{{ e.position }}</td>
+      <td><a class="title" href="/admin/exam/{{ e.id }}">{{ e.title }}</a></td>
+      <td>{% if e.published %}<span class="badge ok">Faol</span>{% else %}<span class="badge new">Yashirin</span>{% endif %}</td>
+      <td class="num">{% if sel_kind == 'dtm' %}{{ e.n_a }} + {{ e.n_b }}{% else %}{{ e.n_a + e.n_b }}{% endif %}</td>
+      <td class="num">{% if e.n_q == 0 %}<span class="badge warn">0</span>{% else %}{{ e.n_q }}{% endif %}</td>
+      <td class="num">{{ e.max_points|num }}</td>
+      <td class="num">{{ e.time_limit }} daq</td>
+      <td class="num">{{ e.n_att }}</td>
+      <td class="num"><a class="ghost sm" href="/admin/exam/{{ e.id }}">{{ icon('edit') }} Boshqarish</a></td>
+    </tr>
+    {% else %}<tr><td colspan="9" class="empty">Bu turda test yo'q</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+</section>
+
+<details class="card" {{ 'open' if not rows }}>
+  <summary>Yangi test yaratish</summary>
+  <form method="post" action="/admin/exam/new" id="exam-form">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    {% set e = none %}
+    {% include "admin/_exam_fields.html" %}
+    <button class="btn" type="submit">{{ icon('plus') }} Yaratish</button>
+  </form>
+</details>
+{% endblock %}

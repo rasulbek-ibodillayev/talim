@@ -1,0 +1,30 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import icon, badge, pct_badge %}
+{% block title %}Xatolarim{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><span class="eyebrow">Mening</span><h1>Xatolarim</h1><p>Mavzu testidan birinchi urinishda o'tolmagan mavzularingiz. Shu yerdan mavzuga qaytib, uni qayta o'zlashtirishingiz mumkin. O'tish foizi: {{ st.pass_percent }}%.</p></div>
+</div>
+
+{% for t in items %}
+<section class="card">
+  <div class="card-head">
+    <h2>{{ t.title }}</h2>
+    {% if t.passed %}{{ badge('ok', "Keyin o'zlashtirildi") }}{% else %}{{ badge('err', "Hali o'tilmagan") }}{% endif %}
+  </div>
+  {% if t.summary %}<p class="text-2">{{ t.summary }}</p>{% endif %}
+  <div class="tl-meta mb">
+    {% if t.first %}<span>{{ icon('flag') }} Birinchi urinish: {{ pct_badge(t.first.score | pct(t.first.total)) }}</span>{% endif %}
+    <span>{{ icon('chart') }} Eng yaxshi: {{ t.best_percent }}%</span>
+    <span>{{ icon('refresh') }} Urinishlar: {{ t.attempts }}</span>
+  </div>
+  <div class="actions">
+    {% if t.state in ('locked', 'soon') %}<span class="muted small">{{ icon('lock') }} Bu dars hozir yopiq.</span>
+    {% else %}<button class="btn" type="button" data-start-url="/api/topic/{{ t.id }}/restudy">{{ icon('refresh') }} Qayta o'zlashtirish</button>{% endif %}
+    {% if t.last %}<a class="ghost" href="/result/{{ t.last.id }}">Oxirgi test xatolari {{ icon('right') }}</a>{% endif %}
+  </div>
+</section>
+{% else %}
+<div class="card empty">{{ icon('star', 'xl') }}<h3>Xatolar yo'q</h3><p>Mavzu testidan birinchi urinishda o'tolmasangiz, shu mavzu bu yerda paydo bo'ladi.</p></div>
+{% endfor %}
+{% endblock %}

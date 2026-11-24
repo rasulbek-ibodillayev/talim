@@ -1,0 +1,32 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import icon %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<nav class="crumbs"><a href="{{ back }}">{{ icon('left') }} {{ title }}</a></nav>
+<div class="page-head">
+  <div>
+    <span class="eyebrow">{{ kind_label }}</span>
+    <h1>{{ title }}</h1>
+  </div>
+</div>
+
+<div class="quiz-layout" id="quiz" data-id="{{ aid }}">
+  <section class="card" id="quiz-main">
+    <p class="muted">Savollar yuklanmoqda...</p>
+  </section>
+  <aside class="card quiz-side">
+    <div class="actions between mb">
+      <h3 class="mb-0">Savollar</h3>
+      <span class="timer" id="timer" hidden>{{ icon('clock') }}<span>--:--</span></span>
+    </div>
+    <div class="palette" id="palette"></div>
+    <div class="legend"><span><i class="ans"></i>Javob berilgan</span><span><i class="idk"></i>Bilmayman</span><span><i></i>Javobsiz</span></div>
+    <div class="bar mt" id="answered-bar"><i style="width: 0%"></i></div>
+    <p class="muted small" style="margin-top: 6px">Javob berildi: <b id="answered">0</b> / <span id="total">0</span> <span id="save-state" class="muted"></span></p>
+    <div class="stack">
+      <button class="btn block accent" type="button" id="finish">{{ icon('flag') }} Testni yakunlash</button>
+    </div>
+    <p class="muted small mt mb-0">Javoblar avtomatik saqlanadi. Sahifadan chiqsangiz, vaqt to'xtamaydi. Klaviatura: <span class="kbd">A</span>–<span class="kbd">D</span>, <span class="kbd">0</span> bilmayman, <span class="kbd">←</span> <span class="kbd">→</span>.</p>
+  </aside>
+</div>
+{% endblock %}

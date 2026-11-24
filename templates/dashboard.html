@@ -1,0 +1,119 @@
+{% extends "app_base.html" %}
+{% from "_macros.html" import icon, badge, bar, ring, attempt_name, attempt_kind, mmss %}
+{% block title %}Bosh sahifa{% endblock %}
+{% block content %}
+{% set cur = pd.current %}
+<section class="card hero">
+  <div>
+    <span class="eyebrow">Xush kelibsiz, {{ user.first_name }}</span>
+    {% if not pd.all %}
+      <h1>Dars reja tez orada tuziladi</h1>
+      <p>Administrator mavzularni kiritgach, shu yerda dars rejangiz paydo bo'ladi. Hozircha «Testlar» bo'limidagi testlarni ishlashingiz mumkin.</p>
+      <div class="actions"><a class="btn" href="/exams">{{ icon('list') }} Testlar</a></div>
+    {% elif cur %}
+      <h1>{{ cur.n }}-dars: {{ cur.title }}</h1>
+      <p>
+        {% if cur.diag_percent is not none %}Diagnostikada bu mavzudan {{ cur.diag_percent }}% natija ko'rsatdingiz. {% endif %}
+        {% if cur.attempts %}Mavzu testidan hali o'tilmagan: darsni qayta o'zlashtirib, testni yana topshiring.{% else %}Dars rejangizdagi joriy dars.{% endif %}
+      </p>
+      <div class="actions">
+        <a class="btn lg" href="/topic/{{ cur.id }}">{{ icon('play') }} {{ "Qayta o'zlashtirish" if cur.attempts else 'Darsni davom ettirish' }}</a>
+      </div>
+    {% elif not pd.total %}
+      <h1>Darslar tayyorlanmoqda</h1>
+      <p>Ustoz mavzularga material va test kiritgach, darslar ochiladi. Hozircha «Testlar» bo'limidagi testlarni ishlashingiz mumkin.</p>
+      <div class="actions"><a class="btn" href="/exams">{{ icon('list') }} Testlar</a></div>
+    {% else %}
+      <h1>Dars reja to'liq bajarildi!</h1>
+      <p>Ajoyib natija. Endi bilimingizni olimpiada, milliy sertifikat yoki DTM testlarida sinab ko'ring.</p>
+      <div class="actions"><a class="btn lg" href="/exams">{{ icon('list') }} Testlar</a></div>
+    {% endif %}
+  </div>
+  {% if pd.total %}{{ ring(pd.pct, "bajarildi") }}{% endif %}
+</section>
+
+{% if not user.secret_hash %}
+<div class="flash warn">{{ icon('alert') }}<span>Mahfiy so'z qo'yilmagan: parolni unutsangiz, tiklab bo'lmaydi. <a href="/profile#secret">Profilda qo'ying</a>.</span></div>
+{% endif %}
+
+{% if unfinished %}
+<section class="card">
+  <h2>Yakunlanmagan testlar</h2>
+  <ul class="list">
+    {% for a in unfinished %}
+      <li><div class="grow"><div class="title">{{ attempt_name(a) }}</div><div class="muted small">{{ attempt_kind(a) }} Qolgan vaqt: {{ mmss(a.left) }}</div></div>
+        <a class="btn sm" href="/quiz/{{ a.id }}">{{ icon('play') }} Davom ettirish</a></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<div class="grid three section">
+  <div class="card stat"><div class="stat-icon">{{ icon('book', 'lg') }}</div><div><div class="stat-value">{{ pd.done }}/{{ pd.total }}</div><div class="stat-label">Dars o'tildi</div></div></div>
+  <div class="card stat"><div class="stat-icon ok">{{ icon('check', 'lg') }}</div><div><div class="stat-value">{{ stats.n }}</div><div class="stat-label">Topshirilgan test</div></div></div>
+  <div class="card stat"><div class="stat-icon accent">{{ icon('chart', 'lg') }}</div><div><div class="stat-value">{{ stats.avg }}%</div><div class="stat-label">O'rtacha natija</div></div></div>
+</div>
+
+{% if pd.all %}
+<div class="page-head" id="plan">
+  <div><h2 class="mb-0">Dars reja</h2>
+  <p>{% if pd.has_diag %}Diagnostika natijasi asosida tuzilgan.{% else %}Barcha mavzular ketma-ket o'tiladi.{% endif %} Keyingi dars oldingi dars testidan o'tgach ochiladi.</p></div>
+</div>
+{% endif %}
+{% if pd.plan %}
+<ol class="timeline section">
+  {% for t in pd.plan %}
+  <li class="tl-item {{ 'done' if t.state == 'done' else ('current' if t.state == 'current' else '') }} {{ 'weak' if t.level == 'low' }}">
+    <span class="tl-dot">{% if t.state == 'done' %}{{ icon('check') }}{% elif t.state in ('locked', 'soon') %}{{ icon('lock' if t.state == 'locked' else 'clock') }}{% else %}{{ t.n }}{% endif %}</span>
+    <article class="card tl-card {{ 'locked' if t.state in ('locked', 'soon') }}">
+      <div class="tl-head">
+        <h3>{% if t.state in ('locked', 'soon') %}{{ t.n }}-dars. {{ t.title }}{% else %}<a href="/topic/{{ t.id }}">{{ t.n }}-dars. {{ t.title }}</a>{% endif %}</h3>
+        <div class="actions">
+          {% if t.level %}{{ badge(levels[t.level][1], levels[t.level][0] ~ ' daraja') }}{% endif %}
+          {{ badge(states[t.state][1], states[t.state][0]) }}
+        </div>
+      </div>
+      <div class="tl-meta">
+        {% if t.diag_percent is not none %}<span>{{ icon('target') }} Diagnostika: {{ t.diag_percent }}%</span>{% endif %}
+        {% if t.attempts %}<span>{{ icon('refresh') }} Test urinishlari: {{ t.attempts }}</span>{% endif %}
+        {% if t.best_percent is not none %}<span>{{ icon('chart') }} Eng yaxshi: {{ t.best_percent }}%</span>{% endif %}
+      </div>
+      {% if t.state not in ('locked', 'soon') %}
+        {% if t.summary %}<p class="text-2">{{ t.summary }}</p>{% endif %}
+        <div class="tl-steps">
+          <div class="tl-step {{ 'ok' if t.mat_total and t.mat_read >= t.mat_total }}">
+            {{ icon('check' if t.mat_total and t.mat_read >= t.mat_total else 'book', 'lg') }}
+            <div class="grow"><b>Materiallar</b>{{ t.mat_read }} / {{ t.mat_total }} {{ bar(t.mat_pct, 'thin ok') }}</div>
+          </div>
+          <div class="tl-step {{ 'ok' if t.state == 'done' }}">
+            {{ icon('check' if t.state == 'done' else 'target', 'lg') }}
+            <div><b>Mavzu testi</b>{% if t.n_test == 0 %}Test yo'q{% else %}{{ st.pass_percent }}% to'plash kerak{% endif %}</div>
+          </div>
+        </div>
+        {% if t.state == 'current' %}<a class="btn sm" href="/topic/{{ t.id }}">{{ 'Boshlash' if not t.mat_read else 'Davom ettirish' }} {{ icon('right') }}</a>
+        {% else %}<a class="ghost sm" href="/topic/{{ t.id }}">Takrorlash</a>{% endif %}
+      {% else %}
+        <p class="muted small mb-0">{% if t.state == 'soon' %}{{ icon('clock') }} Ustoz bu mavzuga hali material va test kiritmagan.{% else %}{{ icon('lock') }} Oldingi dars testidan muvaffaqiyatli o'tgach ochiladi.{% endif %}</p>
+      {% endif %}
+    </article>
+  </li>
+  {% endfor %}
+</ol>
+{% elif pd.all %}
+<div class="card empty">{{ icon('star', 'xl') }}<h2>Barcha mavzularni yaxshi bilasiz!</h2><p>Dars rejaga mavzu kirmadi. Testlar bo'limida o'zingizni sinab ko'ring.</p><a class="btn" href="/exams">Testlar</a></div>
+{% else %}
+<div class="card empty">{{ icon('book') }}<p>Dars reja hali tuzilmagan.</p></div>
+{% endif %}
+
+{% if pd.skipped %}
+<section class="card">
+  <h2>Dars rejadan chiqarilgan mavzular</h2>
+  <p class="muted small">Diagnostikada bu mavzularni yaxshi bilishingiz aniqlandi. Xohlasangiz ko'rib chiqishingiz mumkin.</p>
+  <ul class="list">
+    {% for t in pd.skipped %}
+      <li><span class="stat-icon ok">{{ icon('star') }}</span><div class="grow"><a class="title" href="/topic/{{ t.id }}">{{ t.title }}</a><div class="muted small">Diagnostika: {{ t.diag_percent }}%</div></div><a class="ghost sm" href="/topic/{{ t.id }}">Ko'rish</a></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}
