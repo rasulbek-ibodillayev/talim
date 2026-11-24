@@ -43,6 +43,15 @@ python create_admin.py
 gunicorn -w 2 -b 127.0.0.1:8000 app:app
 ```
 
+## Serverni yangilash
+
+```bash
+bash ~/talim/yangilash.sh
+```
+
+Skript bazadan nusxa oladi (`~/zaxira/`), GitHub'dagi `main` ni o'rnatadi va `talim` xizmatini qayta yoqadi. Yangi
+versiya ishga tushmasa, eski kod qaytariladi. Baza va `.env` ga tegmaydi.
+
 ## Productionga chiqarish (HTTPS)
 
 Domen ulang va nginx/Caddy orqali HTTPS qiling. So'ng `.env`da:
